@@ -140,7 +140,7 @@ def plot_bar_charts_with_error(df, group_by='episodes', save_images=False, outpu
     Genera gráficos de barras con barras de error (media ± std)
     """
     metrics = {
-        'winrate': {'title': 'Winrate por Grupo', 'ylabel': 'Winrate (%)', 'color': '#2E86AB'},
+        'winrate': {'title': 'Evolución de win_rate según la cantidad de episodios de entrenamiento', 'ylabel': 'Winrate (%)', 'color': '#2E86AB'},
         'avg_returns': {'title': 'Average Returns por Grupo', 'ylabel': 'Average Returns', 'color': '#A23B72'},
         'avg_episode_steps': {'title': 'Average Episode Steps por Grupo', 'ylabel': 'Steps', 'color': '#F18F01'},
         'avg_win_steps': {'title': 'Average Win Steps por Grupo', 'ylabel': 'Win Steps', 'color': '#C73E1D'}
