@@ -300,6 +300,24 @@ def plot_epsilon_comparison(df, save_images=False, output_dir=None):
     plt.show(block=False)
 
 
+def setup_output_directory(save_images=False, custom_output_dir=None):
+    """
+    Configura directorio de salida para gráficos
+    """
+    if not save_images:
+        return None
+    
+    if custom_output_dir:
+        output_dir = Path(custom_output_dir)
+    else:
+        base_path = Path(__file__).parent.parent.parent
+        output_dir = base_path / "outputs" / "figures" / f"comparison_analysis"
+    
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    print(f"Directorio de salida: {output_dir}")
+    return output_dir
+
 def main():
     """
     Función principal
@@ -312,6 +330,7 @@ Ejemplos de uso:
   python compare_results.py
   python compare_results.py --data_dir data/processed --save_images
   python compare_results.py --group_by epsilon_group --save_images
+  python compare_results.py --save_images --output_dir ./mis_graficos
         """
     )
     
@@ -336,7 +355,19 @@ Ejemplos de uso:
         help='Guardar gráficos como imágenes PNG'
     )
     
+    parser.add_argument(
+        '--output_dir', 
+        type=str, 
+        default=None,
+        help='Directorio personalizado para guardar las imágenes (requiere --save_images)'
+    )
+    
     args = parser.parse_args()
+    
+    # Validar argumentos
+    if args.output_dir and not args.save_images:
+        print("Error: --output_dir requiere usar --save_images")
+        return False
     
     print("ANÁLISIS COMPARATIVO DE RESULTADOS Q-LEARNING")
     print("=" * 50)
@@ -355,7 +386,7 @@ Ejemplos de uso:
     
     # Configurar salida
     print("\n3. Configurando directorio de salida...")
-    output_dir = setup_output_directory(args.save_images)
+    output_dir = setup_output_directory(args.save_images, args.output_dir)
     
     # Configurar estilo de matplotlib
     plt.style.use('seaborn-v0_8')
@@ -376,7 +407,6 @@ Ejemplos de uso:
     # Boxplots
     print("   - Boxplots de distribuciones...")
     plot_boxplots(df, args.group_by, args.save_images, output_dir)
-    
     
     # Comparación por epsilon si está disponible
     print("   - Comparación por epsilon...")
