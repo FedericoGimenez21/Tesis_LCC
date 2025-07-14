@@ -1,11 +1,11 @@
-# Análisis de resultados experimentales del agente Q-Learning en escenario Tiny
+# Análisis de resultados experimentales del agente Q-Learning
 
 ## Resumen ejecutivo
-Este análisis evalúa el rendimiento de un agente Q-learning entrenado en el escenario Tiny de NetSecGame bajo tres configuraciones de entrenamiento (4000, 6000 y 8000 episodios), con 10 ejecuciones independientes por configuración. Los resultados revelan patrones importantes sobre la evolución del aprendizaje, estabilidad y eficiencia del algoritmo.
+Este análisis evalúa el rendimiento de un agente Q-learning entrenado en el escenario tiny, small y three_net de NetSecGame bajo tres configuraciones de entrenamiento (4000, 6000 y 8000 episodios), con 10 ejecuciones independientes por configuración. Los resultados revelan patrones importantes sobre la evolución del aprendizaje, estabilidad y eficiencia del algoritmo.
 
 ## Variabilidad inherente en el aprendizaje por refuerzo
 
-Las variaciones observadas en los resultados obtenidos por el agente de Q-learning en NetSecGame se deben a múltiples fuentes de aleatoriedad inherentes al algoritmo y al entorno. Aunque la Q-table se inicializa con valores cero (proporcionando un punto de partida neutro y optimista), la variabilidad surge principalmente del proceso de selección de acciones mediante la estrategia epsilon-greedy, que introduce elementos aleatorios durante todo el entrenamiento para balancear exploración y explotación.
+Las variaciones observadas en los resultados obtenidos por el agente de Q-learning en NetSecGame se deben a múltiples fuentes de aleatoriedad inherentes al algoritmo y al escenario. Aunque la Q-table se inicializa con valores cero (proporcionando un punto de partida neutro y optimista), la variabilidad surge principalmente del proceso de selección de acciones mediante la estrategia epsilon-greedy, que introduce elementos aleatorios durante todo el entrenamiento para balancear exploración y explotación.
 
 Adicionalmente, el orden en que el agente explora diferentes estados y acciones varía entre ejecuciones, lo que puede influir significativamente en la velocidad de convergencia y el retorno acumulado de cada episodio. Esta variabilidad se ve amplificada por la ruptura aleatoria de empates cuando múltiples acciones tienen el mismo Q-value, especialmente durante las fases iniciales del entrenamiento cuando muchos valores permanecen en cero.
 
@@ -13,7 +13,9 @@ El entorno NetSecGame también puede introducir variabilidad a través de posibl
 
 Por este motivo, se realizaron múltiples ejecuciones independientes (n=10) para cada configuración experimental, promediando los resultados para obtener una evaluación más robusta y representativa del comportamiento del agente. Esta metodología permite distinguir entre la variabilidad inherente al algoritmo y las tendencias reales de aprendizaje, proporcionando mayor confianza estadística en las conclusiones extraídas y permitiendo identificar patrones consistentes a pesar de la naturaleza estocástica del proceso de aprendizaje.
 
-## Winrate por cantidad de episodios
+## Resultados obtenidos de tiny_scenario
+
+### Winrate por cantidad de episodios
 
 Una de las métricas más directas y relevantes para evaluar el rendimiento de un agente de aprendizaje por refuerzo es el porcentaje de victorias o winrate. Esta métrica indica con qué frecuencia el agente alcanza el estado objetivo dentro de un episodio, y sirve como una medida general del éxito del entrenamiento.
 
@@ -34,11 +36,11 @@ Las barras de error son considerables en los tres casos, pero se amplifican al a
 
 ### Distribución de WinRate
 
-![Win_rate_bar_chart](../../outputs/figures/comparison_analysis/tiny/bar_chart_winrate_episodes.png)
+![Win_rate_bar_chart](../../outputs/figures/comparison_analysis/tiny/boxplot_winrate_episodes.png)
 *Figura X: Boxplot del porcentaje de victorias (winrate (%)) obtenidas por un agente de Q-learning tras 10 ejecuciones independientes por cada grupo de entrenamiento (4000, 6000 y 8000 episodios) en el escenario tiny. La mediana está resaltada en cada caja. Si bien algunos agentes logran mejores resultados con más entrenamiento, la mediana permanece estable y la variabilidad aumenta con la cantidad de episodios.*
 
 
-El gráfico muestra boxplots del porcentaje de victorias (winrate (%)) obtenido por el agente tras ser entrenado durante 4000, 6000 y 8000 episodios, a lo largo de 10 ejecuciones independientes por grupo.
+La Figura X, muestra boxplots del porcentaje de victorias (winrate (%)) obtenido por el agente tras ser entrenado durante 4000, 6000 y 8000 episodios, a lo largo de 10 ejecuciones independientes por grupo.
 
 - 4000 episodios: Mediana ≈ 12.1 %
 - 6000 episodios: Mediana ≈ 12.2 %
@@ -55,7 +57,7 @@ En contraste, los grupos de 6000 y 8000 episodios muestran una mayor dispersión
 En el grupo de 4000 se observa un valor atípico alto (outlier), lo que podría ser una ejecución particularmente exitosa, aunque no representa la tendencia general.
 
 
-## Win Steps por cantidad de episodios
+### Win Steps por cantidad de episodios
 
 Resulta relevante analizar la eficiencia con la que logra sus objetivos, es decir, cuántos pasos necesita, en promedio, para alcanzar una victoria. Esta métrica permite evaluar si el agente no solo aprende a ganar, sino si además optimiza su comportamiento en el proceso de entrenamiento.
 En esta sección se presenta la evolución de la métrica average_win_steps.
@@ -99,7 +101,7 @@ El grupo de 6000 episodios presenta la mayor dispersión, con un rango más ampl
 En contraste, los grupos de 4000 y 8000 episodios presentan una distribución más compacta y consistente, aunque en el caso de 8000 episodios hay algunos valores bajos que podrían estar influyendo.
 
 
-## Returns por episodio
+### Returns por episodio
 
 Los retornos promedio (average returns) constituyen una métrica fundamental en el aprendizaje por refuerzo, ya que reflejan la recompensa acumulada que obtiene el agente a lo largo de un episodio completo. Esta métrica proporciona una visión integral del rendimiento del agente, capturando no solo si alcanza el objetivo (como lo hace el winrate), sino también la eficiencia y calidad del proceso de aprendizaje durante todo el episodio.
 
@@ -140,7 +142,7 @@ Las medianas muestran un patrón similar al observado en las medias, con mejora 
 
 
 
-## Steps por episodio
+### Steps por episodio
 
 La Figura X, muestra la evolución del número promedio de pasos por episodio (average episode steps) del agente Q-learning en el escenario Tiny, comparando tres configuraciones de entrenamiento: 4000, 6000 y 8000 episodios. Cada barra representa la media de 10 ejecuciones independientes con barras de error indicando la desviación estándar.
 
@@ -172,7 +174,7 @@ Mientras los returns muestran alta variabilidad, los episode steps demuestran es
 
 
 
-## Evolución de métricas de rendimiento por episodios
+### Evolución de métricas de rendimiento por episodios
 
 La Figura X, presenta cuatro gráficos de líneas que muestran la evolución temporal de diferentes métricas de rendimiento del agente Q-learning en el escenario Tiny. Cada gráfico incluye bandas de confianza (áreas sombreadas) que representan la variabilidad entre las 10 ejecuciones independientes.
 
@@ -189,3 +191,68 @@ Finalmente, con respecto a la metrica avg win steps, el agente desarrolla estrat
 
 
 
+## Evaluación en escenarios de mayor complejidad
+
+Basándose en los resultados obtenidos en el escenario Tiny, donde la configuración de 6000 episodios demostró el mejor balance entre rendimiento y estabilidad, se procedió a evaluar el agente Q-learning en escenarios de mayor complejidad para validar la generalización y escalabilidad del algoritmo. Los escenarios seleccionados fueron **scenario1_small** y **three_net_scenario**, que presentan espacios de estados y acciones significativamente más amplios que el escenario Tiny.
+
+### Configuración experimental
+
+Para mantener coherencia metodológica, se utilizó la configuración óptima identificada previamente:
+- **Episodios de entrenamiento**: 6000
+- **Ejecuciones independientes**: 10 por escenario
+
+### Resultados en scenario1_small
+
+A diferencia del escenario tiny, donde el agente logra consolidar estrategias ganadoras consistentes, en el escenario small el porcentaje de victorias es muy bajo y altamente inconsistente.
+
+La Figura X, evidencia que, incluso tras 6000 episodios de entrenamiento, el agente de Q-learning no logra generalizar estrategias ganadoras en el escenario small. 
+
+![trend_lines](../../outputs/figures/comparison_analysis/small/boxplot_winrate_episodes.png)*Figura X:  Distribución del Winrate en el escenario small tras entrenar al agente de Q-learning durante 6000 episodios.*
+
+#### Métricas de rendimiento
+
+**Winrate:**
+- La mediana del winrate es 1.6 %, lo que indica un desempeño extremadamente bajo. 
+
+- La mayoría de los valores se concentran cerca del rango inferior, entre 0.5 % y 2 %.
+- Comparación con Tiny: A diferencia del escenario tiny, donde el agente logra consolidar estrategias ganadoras consistentes, en el escenario small el porcentaje de victorias es muy bajo y altamente inconsistente.
+
+
+
+### Resultados en three_net_scenario
+
+La Figura X, representa el porcentaje de victorias (winrate (%)) obtenidas por un agente de Q-learning luego de 10 ejecuciones independientes, cada una con un entrenamiento de 6000 episodios. Este entorno es considerablemente más complejo que tiny o small.
+
+La mediana del winrate es de 0.3 %, lo que indica que la mayoría de las ejecuciones apenas lograron una victoria o ninguna.
+
+El rango intercuartílico está comprimido entre aproximadamente 0.22 % y 0.31 %, reflejando un rendimiento muy bajo y uniforme.
+
+![trend_lines](../../outputs/figures/comparison_analysis/3nets/boxplot_winrate_episodes.png)*Figura X:  Distribución del Winrate en el escenario three nets tras entrenar al agente de Q-learning durante 6000 episodios.*
+
+
+La figura revela que el agente de Q-learning no logra aprender una política efectiva en el entorno Three Networks, incluso luego de 6000 episodios. El winrate promedio es casi nulo (≈ 0.3 %) y no se observan ejecuciones significativamente exitosas. 
+
+
+## Conclusiones generales
+
+### Rendimiento del algoritmo Q-learning 
+
+Los resultados experimentales revelan que el algoritmo Q-learning tabular presenta un **rendimiento diferenciado** según la complejidad del entorno de evaluación:
+
+#### En el escenario Tiny
+- **Aprendizaje efectivo**: El agente logra desarrollar estrategias ganadoras con un winrate del 15.5% en la configuración óptima
+- **Convergencia estable**: Las métricas de eficiencia (episode steps, win steps) convergen hacia valores consistentes (~23 pasos por episodio, ~9 pasos para victorias)
+- **Punto óptimo identificado**: 6000 episodios emerge como la configuración que mejor equilibra rendimiento y estabilidad
+
+#### En escenarios complejos (Small y Three Networks)
+- **Limitaciones severas**: El winrate se degrada drásticamente (1.6% en Small, 0.3% en Three Networks)
+- **Falta de generalización**: El agente no logra transferir conocimientos efectivos a entornos más complejos
+- **Aprendizaje restringidos por la expansión del espacio de estados**: El espacio de estados expandido limita significativamente la capacidad de exploración y aprendizaje
+
+### Escalabilidad del algoritmo
+
+Los resultados demuestran **limitaciones fundamentales** del Q-learning para escalar a entornos complejos:
+
+1. **Degradación exponencial del rendimiento**: El winrate disminuye de 15.5% (Tiny) a 1.6% (Small) y 0.3% (Three Networks)
+2. **Exploración insuficiente**: En espacios de estados grandes, el agente no logra explorar eficientemente para desarrollar políticas efectivas
+3. **Tiempo de convergencia**: 6000 episodios resultan insuficientes para entornos complejos, sugiriendo necesidad de estrategias de aprendizaje más avanzadas
