@@ -45,3 +45,14 @@ A diferencia de la inicialización a cero (donde todos los Q(s,a) se inicializan
 
 [2]: Sutton, R. S., Barto, A. G. (2018). Reinforcement Learning: An Introduction. The MIT Press.
  
+[3]: Grefenstette, J. J., Moriarty, D. E., & Schultz, A. C. (1999). Evolutionary algorithms for reinforcement learning. Journal of Artificial Intelligence Research, 11, 241–276.
+
+[4]: Bai, H., Cheng, R., & Jin, Y. (2023). Evolutionary reinforcement learning: A survey. Intelligent Computing. 
+
+[5]: Li, P., Hao, J., Tang, H., Fu, X., Zheng, Y., & Tang, K. (2024). Bridging evolutionary algorithms and reinforcement learning: A comprehensive survey on hybrid algorithms. 
+
+[6]: Neustroev, G., & de Weerdt, M. M. (2020). Generalized optimistic Q-learning with provable efficiency.
+
+[7]: Levine, S., Kumar, A., Tucker, G., & Fu, J. (2020). Offline reinforcement learning: Tutorial, review, and perspectives on open problems.
+
+[8]: Prudencio, R. F., Maximo, M. R. O. A., & Colombini, E. L. (2023). A survey on offline reinforcement learning: Taxonomy, review, and open problems.
