@@ -8,6 +8,9 @@ Este informe detallará estas técnicas, y sus fundamentos teóricos.
 
 ## Tecnicas principales de inicializacion de Q-tables
 
+La inicialización de las funciones de valor, específicamente las Q-Tables, en algoritmos de Reinforcement Learning (RL) es un aspecto crucial que influye significativamente en la eficiencia y la rapidez de convergencia del aprendizaje. Tradicionalmente, las Q-Tables se inicializan en cero, aleatoriamente o de manera optimista, lo que puede limitar la exploración inicial y prolongar el proceso de aprendizaje. Sin embargo, recientes avances en la integración de técnicas evolutivas y de evolución de políticas (Policy Evolution) ofrecen nuevas perspectivas para pre-entrenar y optimizar estas tablas, facilitando una mejor exploración y un rendimiento superior desde las etapas iniciales del entrenamiento.
+
+Este informe profundiza en los métodos que combinan la evolución de políticas con la inicialización de Q-Tables en algoritmos de RL, analizando las bases teóricas, las metodologías existentes y las ventajas potenciales de estos enfoques.
 
 ### Inicialización a ceros
 
@@ -33,11 +36,38 @@ La inicialización optimista es una técnica utilizada en el aprendizaje por ref
 
 La principal ventaja de este enfoque es que fomenta una exploración exhaustiva inicial. Incluso si el agente utiliza una política puramente codiciosa (greedy), que normalmente lo llevaría a explotar rápidamente las acciones que parecen más prometedoras, la inicialización optimista lo impulsa a probar todas las acciones suficientes veces. Esto ocurre porque todas las estimaciones iniciales de Q(s,a) son muy altas. Para que el agente "confíe" en que una acción es realmente peor que otra, debe explorar y experimentar recompensas reales que disminuyan su valor Q(s,a) estimado. Este comportamiento es fundamental para garantizar que no se pasen por alto acciones potencialmente óptimas, un concepto bien documentado por Sutton y Barto [2]. 
 
-Sin embargo, la inicialización optimista introduce un hiperparámetro adicional: el nivel de optimismo, es decir, cuán alto se deben inicializar los valores de Q(s,a). Elegir el valor óptimo es crucial y depende del problema específico. Si el valor inicial es demasiado alto, el agente podría dedicar un tiempo excesivo a explorar acciones subóptimas, lo que ralentizaría la convergencia. Por el contrario, si es demasiado bajo, no se logrará una exploración inicial suficiente, y el agente podría converger prematuramente a una política subóptima. Una heurística común es inicializar Q(s,a) con un valor cercano al máximo teórico posible de la recompensa acumulada.
+Sin embargo, la inicialización optimista introduce un hiperparámetro adicional: el nivel de optimismo, es decir, cuán alto se deben inicializar los valores de Q(s,a) [2,6]. Elegir el valor óptimo es crucial y depende del problema específico. Si el valor inicial es demasiado alto, el agente podría dedicar un tiempo excesivo a explorar acciones subóptimas, lo que ralentizaría la convergencia. Por el contrario, si es demasiado bajo, no se logrará una exploración inicial suficiente, y el agente podría converger prematuramente a una política subóptima. Una heurística común es inicializar Q(s,a) con un valor cercano al máximo teórico posible de la recompensa acumulada.
 
 En entornos no estacionarios, donde las recompensas o las transiciones del entorno cambian con el tiempo, la inicialización optimista puede ser menos efectiva. El sesgo inicial puede persistir y dificultar la adaptación del agente a los cambios dinámicos del entorno. Si bien al inicio el agente puede experimentar recompensas subóptimas debido a la exploración excesiva de acciones aparentemente malas, este es un compromiso (trade-off) necesario para asegurar que no se ignoren acciones potencialmente buenas que, de otra manera, podrían haber sido pasadas por alto.
 
 A diferencia de la inicialización a cero (donde todos los Q(s,a) se inicializan en 0) o la inicialización aleatoria, el sesgo optimista es deliberado y temporal. Se corrige a medida que el agente explora el entorno y actualiza sus estimaciones de Q(s,a). La inicialización aleatoria, por su parte, no garantiza una exploración uniforme, ya que algunas acciones podrían tener valores iniciales más altos por pura casualidad, lo que llevaría al agente a favorecerlas sin una exploración sistemática.
+
+### Inicialización mediante evolución de políticas    
+
+Una estrategia prometedora para acelerar el aprendizaje por refuerzo en entornos discretos consiste en inicializar las Q-tables a partir de políticas preentrenadas mediante algoritmos evolutivos. Este enfoque parte del supuesto de que, si se dispone de una política eficaz —obtenida mediante optimización evolutiva—, es posible utilizar su comportamiento como base para estimar valores iniciales Q(s, a), mejorando la calidad de la exploración en las primeras etapas de entrenamiento.
+
+Este tipo de técnica se fundamenta en la complementariedad entre aprendizaje por refuerzo y algoritmos evolutivos, ampliamente discutida por Grefenstette et al. [3] y analizada en detalle en revisiones recientes como las de Bai et al. [4] y Li et al. [5]. En este contexto, la evolución de políticas actúa como una forma de preentrenamiento, proporcionando una estructura inicial informada que evita la necesidad de exploración totalmente aleatoria o de inicialización a cero, como ocurre en el Q-learning básico descrito por Sutton y Barto [2].
+
+
+En este enfoque, cada individuo de la población representa una política candidata (por ejemplo, un mapeo entre estados y acciones). Estas políticas son evaluadas según la recompensa acumulada que generan en el entorno, lo cual define su fitness. A través de operadores evolutivos —como selección, cruce (crossover) y mutación— se genera una población de políticas sucesivamente mejoradas. Las mejores políticas se traducen luego en estimaciones iniciales de valores Q(s, a), ya sea por registro directo de interacciones o mediante aproximaciones inferidas, lo que da lugar a una Q-table parcialmente informada antes de aplicar el algoritmo de aprendizaje por refuerzo.
+
+Este mecanismo puede entenderse como una forma especializada de inicialización optimista, en el sentido de que los valores Q iniciales no solo se fijan deliberadamente por encima de lo observado, sino que se basan en experiencia empírica adquirida a través del proceso evolutivo. Tal como se argumenta en Neustroev & de Weerdt [6], la inicialización optimista puede incentivar la exploración incluso bajo políticas greedy, y en el caso de las políticas evolucionadas, esta exploración se vuelve estratégicamente guiada.
+
+Las principales ventajas de este enfoque incluyen:
+
+- Reducción significativa del tiempo de convergencia del aprendizaje, ya que el agente comienza desde una política con cierto nivel de rendimiento demostrado.
+
+- Exploración inicial más eficiente, debido a que las políticas evolucionadas tienden a cubrir regiones relevantes del espacio de estados-acciones, reduciendo el riesgo de quedar atrapado en mínimos locales.
+
+No obstante, esta técnica también presenta varios desafíos importantes:
+
+-  Costo computacional elevado, ya que los algoritmos evolutivos requieren evaluar muchas políticas en múltiples episodios.
+
+-  Diseño de la función de aptitud, que debe balancear adecuadamente recompensa acumulada, diversidad y exploración.
+
+-  Problemas de discretización, en caso de que las políticas evolucionadas se generen en espacios continuos y deban traducirse a representaciones tabulares para entornos discretos.
+
+Estas técnicas han demostrado especial utilidad en entornos donde el acceso a datos es limitado o costoso, como es el caso del aprendizaje por refuerzo offline [7,8]. En este tipo de escenarios, donde no es posible explorar activamente el entorno, contar con una Q-table informada por políticas previamente evaluadas representa una ventaja significativa. Además, los estudios de Bai et al. [4] y Li et al. [5] resaltan que las políticas evolucionadas no solo actúan como buenas inicializaciones, sino también como mecanismos de exploración estratégicamente guiada, facilitando una cobertura más robusta del espacio de búsqueda y reduciendo la probabilidad de converger a soluciones subóptimas.
 
 ## Referencias 
 
