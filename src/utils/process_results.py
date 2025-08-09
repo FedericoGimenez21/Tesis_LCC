@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime
 import argparse
 import sys
+import numpy as np
 
 """
 PROCESADOR DE RESULTADOS DE EXPERIMENTOS Q-LEARNING
@@ -15,6 +16,7 @@ de Q-learning en NetSecGame y los convierte a formato CSV estructurado para aná
 def parse_results_md(file_path):
     """
     Parsea el archivo de resultados en formato markdown y extrae los datos estructurados
+    Maneja tanto datos de prueba cada 1000 episodios como resultados finales
     """
     # Verificar que el archivo existe
     if not file_path.exists():
@@ -23,101 +25,186 @@ def parse_results_md(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
     
-    # Patrón simplificado para extraer los datos de cada experimento
-    # Buscar bloques que contienen "Final model performance"
-    blocks = re.split(r'(?=Final model performance)', content)
-    
     data = []
-    for i, block in enumerate(blocks):
-        if 'Final model performance' not in block:
-            continue
-        # Extraer cada métrica individualmente para mayor robustez
+    
+    # Patrón para extraer datos de pruebas cada 1000 episodios
+    test_pattern = r'Tested for (\d+) episodes after (\d+) training episode\.\s*' \
+                   r'Wins=(\d+),\s*' \
+                   r'Detections=(\d+),\s*' \
+                   r'winrate=([\d.]+)%,\s*' \
+                   r'detection_rate=([\d.]+)%,\s*' \
+                   r'average_returns=([-\d.]+) \+- ([\d.]+),\s*' \
+                   r'average_episode_steps=([\d.]+) \+- ([\d.]+),\s*' \
+                   r'average_win_steps=([\d.]+) \+- ([\d.]+),\s*' \
+                   r'average_detected_steps=([\d.nan]+) \+- ([\d.nan]+)\s*' \
+                   r'average_max_steps_steps=([\d.]+) \+- ([\d.]+),\s*' \
+                   r'epsilon=([\d.]+)'
+    
+    # Buscar todas las coincidencias de pruebas cada 1000 episodios
+    test_matches = re.finditer(test_pattern, content, re.MULTILINE | re.DOTALL)
+    
+    for match in test_matches:
         try:
-            # Episodios
-            episodes_match = re.search(r'after (\d+) episodes', block)
-            episodes = int(episodes_match.group(1)) if episodes_match else None
+            test_episodes = int(match.group(1))
+            training_episodes = int(match.group(2))
+            wins = int(match.group(3))
+            detections = int(match.group(4))
+            winrate = float(match.group(5))
+            detection_rate = float(match.group(6))
+            avg_returns = float(match.group(7))
+            std_returns = float(match.group(8))
+            avg_episode_steps = float(match.group(9))
+            std_episode_steps = float(match.group(10))
+            avg_win_steps = float(match.group(11))
+            std_win_steps = float(match.group(12))
             
-            # Wins
-            wins_match = re.search(r'Wins=(\d+)', block)
-            wins = int(wins_match.group(1)) if wins_match else None
+            # Manejar valores nan en average_detected_steps
+            avg_detected_steps_str = match.group(13)
+            std_detected_steps_str = match.group(14)
+            avg_detected_steps = np.nan if avg_detected_steps_str == 'nan' else float(avg_detected_steps_str)
+            std_detected_steps = np.nan if std_detected_steps_str == 'nan' else float(std_detected_steps_str)
             
-            # Winrate
-            winrate_match = re.search(r'winrate=([\d.]+)%', block)
-            winrate = float(winrate_match.group(1)) if winrate_match else None
-            
-            # Average returns - modificado para capturar valores negativos también
-            returns_match = re.search(r'average_returns=([-\d.]+) \+- ([\d.]+)', block)
-            avg_returns = float(returns_match.group(1)) if returns_match else None
-            std_returns = float(returns_match.group(2)) if returns_match else None
-            
-            # Episode steps
-            episode_steps_match = re.search(r'average_episode_steps=([\d.]+) \+- ([\d.]+)', block)
-            avg_episode_steps = float(episode_steps_match.group(1)) if episode_steps_match else None
-            std_episode_steps = float(episode_steps_match.group(2)) if episode_steps_match else None
-            
-            # Win steps
-            win_steps_match = re.search(r'average_win_steps=([\d.]+) \+- ([\d.]+)', block)
-            avg_win_steps = float(win_steps_match.group(1)) if win_steps_match else None
-            std_win_steps = float(win_steps_match.group(2)) if win_steps_match else None
-            
-            # Epsilon
-            epsilon_match = re.search(r'epsilon=([\d.]+)', block)
-            epsilon_val = float(epsilon_match.group(1)) if epsilon_match else None
+            avg_max_steps_steps = float(match.group(15))
+            std_max_steps_steps = float(match.group(16))
+            epsilon_val = float(match.group(17))
             
             # Limpiar epsilon a valores estándar
-            if epsilon_val:
-                if abs(epsilon_val - 0.30) < 0.01:
-                    epsilon_clean = 0.30
-                elif abs(epsilon_val - 0.35) < 0.01:
-                    epsilon_clean = 0.35
-                else:
-                    epsilon_clean = round(epsilon_val, 2)
-            else:
-                epsilon_clean = None
+            epsilon_clean = round(epsilon_val, 2)
             
-            # Solo agregar si tenemos datos mínimos - modificado para incluir avg_returns negativos
-            if wins is not None and winrate is not None and epsilon_clean is not None:
-                data.append({
-                    'experiment_id': f'exp_{len(data)+1:03d}',
-                    'model_name': f'Model_{len(data)+1}',
-                    'episodes': episodes,
-                    'wins': wins,
-                    'winrate': winrate,
-                    'avg_returns': avg_returns,  # Ahora incluye valores negativos
-                    'std_returns': std_returns,
-                    'avg_episode_steps': avg_episode_steps,
-                    'std_episode_steps': std_episode_steps,
-                    'avg_win_steps': avg_win_steps,
-                    'std_win_steps': std_win_steps,
-                    'final_epsilon': epsilon_clean,
-                    'epsilon_start': 0.5,  # Asumido del nombre del experimento
-                    'scenario': 'tiny',    # Asumido del nombre del archivo
-                    'algorithm': 'q_learning',
-                    'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-                })
-                
+            data.append({
+                'experiment_id': f'test_{training_episodes:05d}',
+                'model_name': f'Model_test_{training_episodes}',
+                'test_episodes': test_episodes,
+                'training_episodes': training_episodes,
+                'wins': wins,
+                'detections': detections,
+                'winrate': winrate,
+                'detection_rate': detection_rate,
+                'avg_returns': avg_returns,
+                'std_returns': std_returns,
+                'avg_episode_steps': avg_episode_steps,
+                'std_episode_steps': std_episode_steps,
+                'avg_win_steps': avg_win_steps,
+                'std_win_steps': std_win_steps,
+                'avg_detected_steps': avg_detected_steps,
+                'std_detected_steps': std_detected_steps,
+                'avg_max_steps_steps': avg_max_steps_steps,
+                'std_max_steps_steps': std_max_steps_steps,
+                'current_epsilon': epsilon_clean,
+                'data_type': 'test_checkpoint',
+                'scenario': extract_scenario_from_filename(file_path),
+                'algorithm': 'q_learning',
+                'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            })
+            
         except Exception as e:
-            print(f"Error procesando bloque {i}: {e}")
+            print(f"Error procesando test checkpoint en episodio {match.group(2)}: {e}")
             continue
+    
+    # Patrón para extraer resultado final
+    final_pattern = r'Final model performance after (\d+) episodes\.\s*' \
+                    r'Wins=(\d+),\s*' \
+                    r'Detections=(\d+),\s*' \
+                    r'winrate=([\d.]+)%,\s*' \
+                    r'detection_rate=([\d.]+)%,\s*' \
+                    r'average_returns=([-\d.]+) \+- ([\d.]+),\s*' \
+                    r'average_episode_steps=([\d.]+) \+- ([\d.]+),\s*' \
+                    r'average_win_steps=([\d.]+) \+- ([\d.]+),\s*' \
+                    r'average_detected_steps=([\d.nan]+) \+- ([\d.nan]+)\s*' \
+                    r'average_max_steps_steps=([\d.]+) \+- ([\d.]+),\s*' \
+                    r'epsilon=([\d.]+)'
+    
+    # Buscar resultado final
+    final_match = re.search(final_pattern, content, re.MULTILINE | re.DOTALL)
+    
+    if final_match:
+        try:
+            final_episodes = int(final_match.group(1))
+            wins = int(final_match.group(2))
+            detections = int(final_match.group(3))
+            winrate = float(final_match.group(4))
+            detection_rate = float(final_match.group(5))
+            avg_returns = float(final_match.group(6))
+            std_returns = float(final_match.group(7))
+            avg_episode_steps = float(final_match.group(8))
+            std_episode_steps = float(final_match.group(9))
+            avg_win_steps = float(final_match.group(10))
+            std_win_steps = float(final_match.group(11))
+            
+            # Manejar valores nan en average_detected_steps
+            avg_detected_steps_str = final_match.group(12)
+            std_detected_steps_str = final_match.group(13)
+            avg_detected_steps = np.nan if avg_detected_steps_str == 'nan' else float(avg_detected_steps_str)
+            std_detected_steps = np.nan if std_detected_steps_str == 'nan' else float(std_detected_steps_str)
+            
+            avg_max_steps_steps = float(final_match.group(14))
+            std_max_steps_steps = float(final_match.group(15))
+            epsilon_val = float(final_match.group(16))
+            
+            # Limpiar epsilon a valores estándar
+            epsilon_clean = round(epsilon_val, 2)
+            
+            data.append({
+                'experiment_id': f'final_{final_episodes:05d}',
+                'model_name': f'Model_final_{final_episodes}',
+                'test_episodes': None,
+                'training_episodes': final_episodes,
+                'wins': wins,
+                'detections': detections,
+                'winrate': winrate,
+                'detection_rate': detection_rate,
+                'avg_returns': avg_returns,
+                'std_returns': std_returns,
+                'avg_episode_steps': avg_episode_steps,
+                'std_episode_steps': std_episode_steps,
+                'avg_win_steps': avg_win_steps,
+                'std_win_steps': std_win_steps,
+                'avg_detected_steps': avg_detected_steps,
+                'std_detected_steps': std_detected_steps,
+                'avg_max_steps_steps': avg_max_steps_steps,
+                'std_max_steps_steps': std_max_steps_steps,
+                'current_epsilon': epsilon_clean,
+                'data_type': 'final_result',
+                'scenario': extract_scenario_from_filename(file_path),
+                'algorithm': 'q_learning',
+                'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            })
+            
+        except Exception as e:
+            print(f"Error procesando resultado final: {e}")
     
     if not data:
         raise ValueError("No se encontraron datos válidos en el archivo")
     
     return pd.DataFrame(data)
 
+def extract_scenario_from_filename(file_path):
+    """
+    Extrae el nombre del escenario del nombre del archivo
+    """
+    filename = Path(file_path).stem.lower()
+    
+    if 'tiny' in filename:
+        return 'tiny'
+    elif 'small' in filename:
+        return 'small'
+    elif 'three' in filename or '3net' in filename:
+        return 'three_net'
+    else:
+        return 'unknown'
+
 def generate_output_filename(input_file_path, base_output_dir=None):
     """
     Genera el nombre del archivo de salida basado en el archivo de entrada
-    Formato: INPUT_FILE_epsilon_start_NUMBER_processed.csv
+    Formato: INPUT_FILE_processed.csv
     """
     input_path = Path(input_file_path)
     
     # Extraer nombre base del archivo (sin extensión)
     input_name = input_path.stem
     
-    
     # Generar nombre de salida
-    output_name = f"{input_name}-processed.csv"
+    output_name = f"{input_name}_processed.csv"
     
     # Determinar directorio de salida
     if base_output_dir:
@@ -148,9 +235,12 @@ def main(input_file_path=None, output_dir=None):
         base_path = Path(__file__).parent.parent.parent  # Subir 3 niveles desde src/utils/
         
         possible_paths = [
-            base_path / "data" / "raw" / "netsecgame-experiments" / "epsilon-start-05" / "results-tiny.md",
-            base_path / "data" / "raw" / "netsecgame-experiments" / "epsilon-start-09" / "results-tiny.md",
+            base_path / "data" / "raw" / "netsecgame-experiments" / "results-tiny.md",
+            base_path / "data" / "raw" / "netsecgame-experiments" / "results-small.md",
+            base_path / "data" / "raw" / "netsecgame-experiments" / "results-three-net.md",
             base_path / "data" / "raw" / "results-tiny.md",
+            base_path / "data" / "raw" / "results-small.md",
+            base_path / "data" / "raw" / "results-three-net.md",
             base_path / "results-tiny.md",
             Path("results-tiny.md"),  # En directorio actual
         ]
@@ -185,8 +275,24 @@ def main(input_file_path=None, output_dir=None):
         
         df = parse_results_md(input_file)
         
+        # Mostrar resumen de datos procesados
+        print(f"\n Resumen de datos procesados:")
+        print(f"   • Total de registros: {len(df)}")
+        print(f"   • Checkpoints de prueba: {len(df[df['data_type'] == 'test_checkpoint'])}")
+        print(f"   • Resultados finales: {len(df[df['data_type'] == 'final_result'])}")
+        print(f"   • Escenario detectado: {df['scenario'].iloc[0] if len(df) > 0 else 'N/A'}")
+        
+        if len(df[df['data_type'] == 'test_checkpoint']) > 0:
+            test_data = df[df['data_type'] == 'test_checkpoint']
+            print(f"   • Rango de episodios de entrenamiento: {test_data['training_episodes'].min()} - {test_data['training_episodes'].max()}")
+            print(f"   • Mejor winrate en checkpoints: {test_data['winrate'].max():.2f}% (episodio {test_data.loc[test_data['winrate'].idxmax(), 'training_episodes']})")
+        
         # Guardar CSV procesado
-        df.to_csv(output_file, index=False)        
+        df.to_csv(output_file, index=False)
+        
+        print(f"\n Procesamiento completado exitosamente")
+        print(f"   Archivo guardado: {output_file}")
+        
         return df
         
     except Exception as e:
@@ -199,13 +305,15 @@ def parse_args():
     Parsea argumentos de línea de comandos
     """
     parser = argparse.ArgumentParser(
-        description="Procesa archivos de resultados de experimentos Q-learning",
+        description="Procesa archivos de resultados de experimentos Q-learning con checkpoints cada 1000 episodios",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Ejemplos de uso:
-  python process_results.py --input results-tiny-epsilon-start-05.md
-  python process_results.py --input data/raw/results.md --output data/processed/
+  python process_results.py --input results-tiny.md
+  python process_results.py --input data/raw/results-small.md --output data/processed/
   python process_results.py  # Busca automáticamente el archivo
+
+El script procesa tanto los checkpoints de prueba cada 1000 episodios como el resultado final.
         """
     )
     
@@ -229,6 +337,8 @@ if __name__ == "__main__":
     # Mostrar información de uso
     print("Procesador de Resultados Q-Learning")
     print("="*50)
+    print("Soporta formato con checkpoints cada 1000 episodios")
+    print()
     
     df = main(args.input, args.output)
     
