@@ -38,7 +38,7 @@ def calculate_winrate_statistics(df):
     
     stats.columns = ['Num_Runs', 'Mean_Winrate', 'Std_Winrate', 'Min_Winrate', 'Max_Winrate', 'Median_Winrate']
     
-    print("\n📊 ESTADÍSTICAS DE WINRATE POR EPISODIOS DE ENTRENAMIENTO")
+    print("\n ESTADÍSTICAS DE WINRATE POR EPISODIOS DE ENTRENAMIENTO")
     print("=" * 70)
     print(stats)
     
@@ -46,7 +46,7 @@ def calculate_winrate_statistics(df):
     best_episode = stats['Mean_Winrate'].idxmax()
     best_winrate = stats.loc[best_episode, 'Mean_Winrate']
     
-    print(f"\n🏆 MEJOR RENDIMIENTO:")
+    print(f"\n MEJOR RENDIMIENTO:")
     print(f"   Episodios: {best_episode}")
     print(f"   Winrate promedio: {best_winrate:.2f}%")
     print(f"   Desviación estándar: {stats.loc[best_episode, 'Std_Winrate']:.2f}%")
@@ -84,10 +84,10 @@ def create_winrate_plots(df, save_images=False, output_dir=None):
                 ecolor='black', elinewidth=2)
     
     # Personalizar gráfico
-    plt.title('Winrate Promedio por Episodios de Entrenamiento\n(Barras de error muestran error estándar)', 
+    plt.title('Winrate promedio por episodios de entrenamiento\n(barras de error muestran error estándar)', 
               fontsize=16, fontweight='bold', pad=20)
-    plt.ylabel('Winrate Promedio (%)', fontsize=14, fontweight='bold')
-    plt.xlabel('Episodios de Entrenamiento', fontsize=14, fontweight='bold')
+    plt.ylabel('Winrate promedio (%)', fontsize=14, fontweight='bold')
+    plt.xlabel('Episodios de entrenamiento', fontsize=14, fontweight='bold')
     
     # Configurar etiquetas del eje X
     plt.xticks(range(len(grouped)), grouped['training_episodes'], rotation=45)
@@ -125,10 +125,10 @@ def create_winrate_plots(df, save_images=False, output_dir=None):
         patch.set_alpha(0.7)
     
     # Personalizar gráfico
-    plt.title('Distribución de Winrate por Episodios de Entrenamiento', 
+    plt.title('Distribución de Winrate por episodios de entrenamiento', 
               fontsize=16, fontweight='bold', pad=20)
     plt.ylabel('Winrate (%)', fontsize=14, fontweight='bold')
-    plt.xlabel('Episodios de Entrenamiento', fontsize=14, fontweight='bold')
+    plt.xlabel('Episodios de entrenamiento', fontsize=14, fontweight='bold')
     plt.xticks(rotation=45)
     plt.grid(axis='y', alpha=0.3, linestyle='--')
     
@@ -148,40 +148,7 @@ def create_winrate_plots(df, save_images=False, output_dir=None):
     
     plt.show(block=False)
     
-    # 3. GRÁFICO DE LÍNEAS - Evolución temporal del winrate promedio
-    plt.figure(figsize=(14, 8))
-    
-    plt.errorbar(grouped['training_episodes'], grouped['mean'], 
-                yerr=grouped['se'], marker='o', linewidth=3, markersize=10,
-                capsize=8, capthick=2, color='#2E86AB', markerfacecolor='white',
-                markeredgewidth=2, markeredgecolor='#2E86AB')
-    
-    # Marcar el punto máximo
-    max_idx = grouped['mean'].idxmax()
-    max_episodes = grouped.iloc[max_idx]['training_episodes']
-    max_winrate = grouped.iloc[max_idx]['mean']
-    
-    plt.annotate(f'Máximo: {max_winrate:.1f}%\n({max_episodes} episodios)', 
-                xy=(max_episodes, max_winrate), 
-                xytext=(max_episodes + 1000, max_winrate + 0.5),
-                arrowprops=dict(arrowstyle='->', color='red', lw=2),
-                fontsize=12, ha='center', fontweight='bold',
-                bbox=dict(boxstyle="round,pad=0.5", facecolor="yellow", alpha=0.8))
-    
-    plt.title('Evolución del Winrate Promedio Durante el Entrenamiento', 
-              fontsize=16, fontweight='bold', pad=20)
-    plt.ylabel('Winrate Promedio (%)', fontsize=14, fontweight='bold')
-    plt.xlabel('Episodios de Entrenamiento', fontsize=14, fontweight='bold')
-    plt.grid(True, alpha=0.3, linestyle='--')
-    plt.tight_layout()
-    
-    if save_images and output_dir:
-        plt.savefig(output_dir / "winrate_03_evolution_line.png", dpi=300, bbox_inches='tight')
-        print("Guardado: winrate_03_evolution_line.png")
-    
-    plt.show(block=False)
-    
-    # 4. TABLA RESUMEN con visualización
+    # 3. TABLA RESUMEN con visualización
     plt.figure(figsize=(12, 6))
     plt.axis('tight')
     plt.axis('off')
@@ -201,7 +168,7 @@ def create_winrate_plots(df, save_images=False, output_dir=None):
         ])
     
     table = plt.table(cellText=table_data,
-                     colLabels=['Episodios', 'Runs', 'Media (%)', 'Std (%)', 'Mín (%)', 'Máx (%)', 'Mediana (%)'],
+                     colLabels=['Episodios', 'Runs', 'Media (%)', 'Std (%)', 'Min (%)', 'Max (%)', 'Mediana (%)'],
                      cellLoc='center', loc='center')
     
     # Estilizar tabla
@@ -220,12 +187,12 @@ def create_winrate_plots(df, save_images=False, output_dir=None):
             if i % 2 == 0:
                 table[(i, j)].set_facecolor('#F0F0F0')
     
-    plt.title('Resumen Estadístico de Winrate por Episodios de Entrenamiento', 
-              fontsize=14, fontweight='bold', pad=20)
+    plt.title('Resumen estadístico de Winrate por episodios de entrenamiento', 
+              fontsize=14, fontweight='bold', pad=30)
     
     if save_images and output_dir:
-        plt.savefig(output_dir / "winrate_04_summary_table.png", dpi=300, bbox_inches='tight')
-        print("Guardado: winrate_04_summary_table.png")
+        plt.savefig(output_dir / "winrate_03_summary_table.png", dpi=300, bbox_inches='tight')
+        print("Guardado: winrate_03_summary_table.png")
     
     plt.show(block=False)
 
@@ -248,16 +215,6 @@ def main():
     if df is None:
         return
     
-    # Verificar que tenemos datos de múltiples ejecuciones
-    unique_episodes = df['training_episodes'].nunique()
-    total_runs = len(df)
-    runs_per_episode = df.groupby('training_episodes').size()
-    
-    print(f"\n📋 RESUMEN DE DATOS:")
-    print(f"   Total de registros: {total_runs}")
-    print(f"   Configuraciones de episodios: {unique_episodes}")
-    print(f"   Runs por configuración: {runs_per_episode.min()} - {runs_per_episode.max()}")
-    
     # Calcular estadísticas
     stats = calculate_winrate_statistics(df)
     
@@ -274,11 +231,11 @@ def main():
         print(f"\nDirectorio de salida: {output_dir}")
     
     # Crear gráficos
-    print(f"\n🎨 GENERANDO VISUALIZACIONES...")
+    print(f"\n GENERANDO VISUALIZACIONES...")
     create_winrate_plots(df, args.save, output_dir)
     
     if args.save:
-        print(f"\n✅ Imágenes guardadas en: {output_dir}")
+        print(f"\n Imágenes guardadas en: {output_dir}")
     
     # Mantener gráficos abiertos
     input("\nPresiona Enter para cerrar los gráficos...")
