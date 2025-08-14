@@ -180,3 +180,66 @@ El entorno presenta características dinámicas que aumentan su complejidad:
 El Scenario1 Full de NetSecGame proporciona un entorno de entrenamiento completo y metodológicamente riguroso para la investigación en ciberseguridad y aprendizaje automático. Su diseño incorpora elementos realistas de infraestructuras de red corporativas, manteniendo al mismo tiempo la controlabilidad necesaria para experimentos reproducibles.
 
 La complejidad inherente del escenario, combinada con sus múltiples rutas de solución, lo convierte en una plataforma valiosa para evaluar y comparar diferentes aproximaciones algorítmicas en el dominio de la ciberseguridad ofensiva. Además, su arquitectura escalable proporciona una base sólida para el desarrollo de escenarios más complejos en investigaciones futuras.
+
+
+## Análisis de resultados experimentales del algoritmo Q-learning en Scenario1 de NetSecGame
+
+A continuacion se presentan resultados obtenidos tras ejecutar 10 iteraciones independientes del algoritmo Q-learning en el Scenario1 Full de NetSecGame, evaluando diferentes configuraciones de episodios de entrenamiento (1,000 a 15,000 episodios). Los datos presentados proporcionan información sobre el rendimiento, consistencia y variabilidad del algoritmo en un entorno de ciberseguridad simulado.
+
+![Distribución de Winrate por episodios de entrenamiento](../../outputs/figures/comparison_analysis/scenario1/winrate_02_boxplot_by_episodes.png)
+*Figura X+1: Distribución de winrate por episodios de entrenamiento. Los boxplots muestran la mediana (línea roja), cuartiles y valores atípicos para cada configuración.*
+
+![Winrate promedio por episodios de entrenamiento](../../outputs/figures/comparison_analysis/scenario1/winrate_01_bars_by_episodes.png)
+*Figura X+2: Winrate promedio por episodios de entrenamiento. Las barras de error representan el error estándar de la media (n=10 por configuración).*
+
+![Tabla 1: Resumen estadístico de winrate por episodios de entrenamiento](../../outputs/figures/comparison_analysis/scenario1/winrate_03_summary_table.png)
+*Tabla 1: Resumen estadístico obtenido tras 10 ejecuciones independientes.*
+
+### Análisis del rendimiento general
+
+#### Tendencias de los promedios
+
+Los resultados observados en la Figura X+1, muestran un rendimiento general modesto del algoritmo Q-learning, con winrates promedio que oscilan entre 4.12% y 9.72% a lo largo de las diferentes configuraciones de episodios de entrenamiento. El análisis de las medias revela un patrón no monótono en el rendimiento, donde el incremento en el número de episodios de entrenamiento no se traduce consistentemente en mejoras del winrate.
+
+La configuración de 14,000 episodios presenta el mejor rendimiento promedio (9.72%), seguida por las configuraciones de 6,000 episodios (6.72%) y 13,000 episodios (6.52%). Este comportamiento sugiere que el algoritmo puede beneficiarse de un entrenamiento prolongado en ciertos rangos específicos, pero no muestra una curva de aprendizaje estrictamente creciente.
+
+Las medianas, en general, mantienen valores cercanos a las medias (diferencias típicas menores al 1%), lo que indica distribuciones relativamente simétricas en la mayoría de las configuraciones. Esta característica sugiere ausencia de sesgos significativos hacia valores extremos en el rendimiento.
+
+#### Análisis de consistencia y variabilidad
+
+La desviación estándar de los resultados presenta variaciones considerables entre configuraciones, oscilando desde 0.76% (9,000 episodios) hasta 11.71% (14,000 episodios). Esta variabilidad heterogénea indica que la consistencia del algoritmo está fuertemente influenciada por el número de episodios de entrenamiento.
+
+Las configuraciones con menor variabilidad (9,000, 13,000 y 7,000 episodios con desviaciones estándar de 0.76%, 0.94% y 1.30% respectivamente) demuestran mayor estabilidad en el rendimiento, mientras que la configuración de 14,000 episodios, a pesar de mostrar el mejor rendimiento promedio, exhibe la mayor variabilidad (11.71% de desviación estándar).
+
+
+### Interpretación del análisis distribucional
+
+#### Comparación entre gráfico de barras y boxplot
+
+El boxplot correspondiente a 14,000 episodios presentado en la Figura X+2, muestra un valor atípico significativo (aproximadamente 42.4%), lo que explica la elevada desviación estándar observada en esta configuración. Este outlier sugiere que, bajo ciertas condiciones específicas, el algoritmo puede alcanzar rendimientos sustancialmente superiores, pero esta mejora no es reproducible consistentemente.
+
+La presencia de valores atípicos en varias configuraciones (particularmente visibles en 3,000, 4,000 y 14,000 episodios) indica que el algoritmo ocasionalmente encuentra estrategias exitosas, pero estas no se consolidan como comportamiento estándar.
+
+
+### Factores contribuyentes a la variabilidad
+
+La variabilidad observada puede atribuirse principalmente a tres factores fundamentales:
+
+1. **Inicialización en cero de Q-tables**: Comenzar con todos los valores Q igual a cero establece un punto de partida uniforme para todos los estados y acciones. Si bien esto elimina la variabilidad inicial causada por valores aleatorios, también puede generar trayectorias de aprendizaje más lentas en las etapas tempranas del entrenamiento debido a la ausencia de sesgos exploratorios iniciales.
+
+2. **Balance exploración-explotación**: La política ε-greedy utilizada introduce estocasticidad inherente que puede resultar en diferentes rutas de descubrimiento de estrategias exitosas entre ejecuciones.
+
+3. **Complejidad del entorno**: El Scenario1 Full presenta múltiples rutas de ataque posibles y estados intermedios, creando un espacio de búsqueda complejo donde pequeñas diferencias en las decisiones tempranas pueden amplificarse significativamente.
+
+
+## Conclusion
+
+En conclusion, los resultados presentados constituyen una línea base importante para futuras mejoras algorítmicas y proporcionan evidencia empírica de la complejidad inherente del dominio de ciberseguridad simulada en NetSecGame.
+
+En la implementación actual de Q-learning, las políticas derivadas de las Q-tables se inicializan con un valor uniforme de cero para todos los pares estado-acción. Si bien este enfoque garantiza imparcialidad inicial, puede inducir a un aprendizaje más lento, ya que el agente no recibe señales iniciales que lo orienten hacia acciones potencialmente más prometedoras.
+
+Se propone investigar y evaluar técnicas avanzadas de inicialización de Q-tables y políticas que aceleren la convergencia y mejoren la exploración,tales como:
+
+- Inicialización optimista: usar valores iniciales más altos para fomentar la exploración temprana.
+- Preentrenamiento: entrenar una Q-table inicial mediante episodios de prueba.
+- Técnicas evolutivas: optimizar la Q-table inicial mediante algoritmos genéticos o estrategias evolutivas, especialmente para entornos con alto espacio de estados.
