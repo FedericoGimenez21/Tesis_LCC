@@ -35,8 +35,8 @@
    - [Relevancia para la investigación](#relevancia-para-la-investigación)
 8. [Análisis de resultados experimentales del algoritmo Q-learning en Scenario1](#análisis-de-resultados-experimentales-del-algoritmo-q-learning-en-scenario1-de-netsecgame)
    - [Análisis del rendimiento general](#análisis-del-rendimiento-general-1)
-   - [Interpretación del análisis distribucional](#interpretación-del-análisis-distribucional-1)
-   - [Factores contribuyentes a la variabilidad](#factores-contribuyentes-a-la-variabilidad-1)
+   - [Interpretación del análisis distribucional](#interpretación-del-análisis-distribucional)
+   - [Factores contribuyentes a la variabilidad](#factores-contribuyentes-a-la-variabilidad)
 9. [Conclusiones](#conclusiones)
 ---
 
@@ -788,7 +788,7 @@ La variabilidad observada puede atribuirse principalmente a tres factores fundam
 3. **Complejidad del entorno**: El Scenario1 Full presenta múltiples rutas de ataque posibles y estados intermedios, creando un espacio de búsqueda complejo donde pequeñas diferencias en las decisiones tempranas pueden amplificarse significativamente.
 
 
-## Conclusión
+## Conclusiones
 
 En conclusión, los resultados presentados constituyen una línea base importante para futuras mejoras algorítmicas y proporcionan evidencia empírica de la complejidad inherente del dominio de ciberseguridad simulada en NetSecGame.
 
