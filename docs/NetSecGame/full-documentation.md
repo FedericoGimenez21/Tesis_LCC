@@ -568,7 +568,7 @@ El diseño del escenario se basa en principios de seguridad de redes empresarial
 
 La arquitectura de red del Scenario1 Full presentada en la Figura N, se estructura mediante una topología segmentada que comprende dos subredes principales interconectadas a través de un router central con funcionalidades de firewall integradas. Esta configuración refleja las mejores prácticas de segmentación de red utilizadas en entornos empresariales para limitar el alcance de potenciales compromisos de seguridad.
 
-![Topología del escenario full](../NetSecGame/figures\scenario_1.png)
+![Topología del escenario full](../NetSecGame/figures/scenario_1.png)
 *Figura X: Topología de red del escenario1 full de NetSecGame.*
 
 Las subredes están organizadas de la siguiente manera:
