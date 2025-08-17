@@ -11,7 +11,7 @@
 
 ## ¿Qué es NetSecGame?
 
-NetSecGame es un entorno de simulación avanzado diseñado específicamente para la evaluación de agentes autónomos en tareas de ciberseguridad ofensiva. Fue creado por [Stratosphere Research Laboratory](https://www.stratosphereips.org/), el grupo de ciberseguridad del Centro de Inteligencia Artificial de la Facultad de Ingeniería Eléctrica de la Universidad Técnica Checa en Praga. Este grupo trabaja en la intersección de ciberseguridad, aprendizaje automático y asistencia a otros.
+[NetSecGame](https://github.com/stratosphereips/NetSecGame) (Network Security Game) es un framework para el entrenamiento y la evaluación de agentes de IA en tareas de seguridad de red (tanto ofensivas como defensivas). Está desarrollado con el simulador de red [CYST](https://pypi.org/project/cyst/) y permite el desarrollo y la prueba rápidos de agentes de IA en escenarios altamente configurables. Se pueden ver ejemplos de agentes implementados en el submódulo [NetSecGameAgents](https://github.com/stratosphereips/NetSecGameAgents/tree/main). Fue creado por [Stratosphere Research Laboratory](https://www.stratosphereips.org/), el grupo de ciberseguridad del Centro de Inteligencia Artificial de la Facultad de Ingeniería Eléctrica de la Universidad Técnica Checa en Praga. Este grupo trabaja en la intersección de ciberseguridad, aprendizaje automático y asistencia a otros.
 
 Se trata de un simulador que modela escenarios realistas de redes computacionales donde los agentes pueden ejecutar acciones típicas de un atacante: reconocimiento, explotación de vulnerabilidades, movimiento lateral y exfiltración de datos.
 
@@ -53,6 +53,155 @@ NetSecGame sigue el paradigma clásico de interacción agente-entorno en aprendi
 5. **Recompensa**: Se calcula una recompensa basada en el progreso del agente hacia sus objetivos y el costo de la acción ejecutada.
 
 6. **Iteración**: El proceso se repite hasta que se alcanza una condición de terminación (éxito, tiempo límite, detección).
+
+### Modo de uso
+
+Es necesario especificar una `task configuration` para iniciar NetSecGame. Para las pruebas realizadas se utilizó la siguiente configuración: 
+
+```
+# Configuration file for the NetSecGame environment
+
+coordinator:
+  # Define the conf for all the 'attacker' agents.
+  agents:
+    Attacker:
+      max_steps: 100
+      goal:
+        description: "Exfiltrate data to '213.47.23.195'"
+        is_any_part_of_goal_random: True
+        known_networks: []
+        #known_networks: [192.168.1.0/24, 192.168.3.0/24]
+        known_hosts: []
+        #known_hosts: [192.168.1.1, 192.168.1.2]
+        controlled_hosts: []
+        #controlled_hosts: [213.47.23.195, 192.168.1.3]
+        # Services are defined as a target host where the service must be, and then a description in the form 'name,type,version,is_local'
+        known_services: {}
+        #known_services: {192.168.1.3: [Local system, lanman server, 10.0.19041, False], 192.168.1.4: [Other system, SMB server, 21.2.39421, False]}
+        # In data, put the target host that must have the data and which data in format user,data
+        # Example to fix the data in one host
+        known_data: {213.47.23.195: [[User1,DataFromServer1]]}
+        # Example to fix two data in one host
+        #known_data: {213.47.23.195: [[User1,DataFromServer1], [User5,DataFromServer5]]}
+        # Example to fix the data in two host
+        #known_data: {213.47.23.195: [User1,DataFromServer1], 192.168.3.1: [User3,Data3FromServer3]}
+        # Example to ask a random data in a specific server. Putting 'random' in the data, forces the env to randomly choose where the goal data is
+        # known_data: {213.47.23.195: [random]}
+        known_blocks: {}
+        # Example of known blocks. In the host 192.168.2.2, block all connections coming or going to 192.168.1.3
+        # known_blocks: {192.168.2.2: {192.168.1.3}}
+      start_position:
+        known_networks: []
+        known_hosts: []
+        # The attacker must always at least control the CC if the goal is to exfiltrate there
+        # Example of fixing the starting point of the agent in a local host
+        controlled_hosts: [213.47.23.195, random]
+        # Example of asking a random position to start the agent
+        # controlled_hosts: [213.47.23.195, random]
+        # Services are defined as a target host where the service must be, and then a description in the form 'name,type,version,is_local'
+        known_services: {}
+        # known_services: {192.168.1.3: [Local system, lanman server, 10.0.19041, False], 192.168.1.4: [Other system, SMB server, 21.2.39421, False]}
+        # Same format as before
+        known_data: {}
+        known_blocks: {}
+        # Example of known blocks to start with. In the host 192.168.2.2, block all connections coming or going to 192.168.1.3
+        # known_blocks: {192.168.2.2: {192.168.1.3}}
+
+    Defender:
+      goal:
+        description: "Block all attackers"
+        is_any_part_of_goal_random: False
+        known_networks: []
+        # Example
+        #known_networks: [192.168.1.0/24, 192.168.3.0/24]
+        known_hosts: []
+        # Example
+        #known_hosts: [192.168.1.1, 192.168.1.2]
+        controlled_hosts: []
+        # Example
+        #controlled_hosts: [213.47.23.195, 192.168.1.3]
+        # Services are defined as a target host where the service must be, and then a description in the form 'name,type,version,is_local'
+        known_services: {}
+        # Example
+        #known_services: {192.168.1.3: [Local system, lanman server, 10.0.19041, False], 192.168.1.4: [Other system, SMB server, 21.2.39421, False]}
+        # In data, put the target host that must have the data and which data in format user,data
+        # Example to fix the data in one host
+        known_data: {}
+        # Example to fix two data in one host
+        #known_data: {213.47.23.195: [[User1,DataFromServer1], [User5,DataFromServer5]]}
+        # Example to fix the data in two host
+        #known_data: {213.47.23.195: [User1,DataFromServer1], 192.168.3.1: [User3,Data3FromServer3]}
+        # Example to ask a random data in a specific server. Putting 'random' in the data, forces the env to randomly choose where the goal data is
+        # known_data: {213.47.23.195: [random]}
+        known_blocks: {213.47.23.195: 'all_attackers'}
+        # Example of known blocks. In the host 192.168.2.2, block all connections coming or going to 192.168.1.3
+        # known_blocks: {192.168.2.2: {192.168.1.3}}
+        # You can also use the wildcard string 'all_routers', and 'all_attackers', to mean that all the controlled hosts of all the attackers should be in this list in order to win
+
+      start_position:
+        # should be empty for defender - will be extracted from controlled hosts
+        known_networks: []
+        # should be empty for defender - will be extracted from controlled hosts
+        known_hosts: []
+        # list of controlled hosts, wildard "all_local" can be used to include all local IPs
+        controlled_hosts: [all_local]
+        known_services: {}
+        known_data: {}
+        # Blocked IPs
+        blocked_ips: {}
+        known_blocks: {}
+        # Example of known blocks to start with. In the host 192.168.2.2, block all connections coming or going to 192.168.1.3
+        # known_blocks: {192.168.2.2: {192.168.1.3}}
+
+env:
+  # random means to choose the seed in a random way, so it is not fixed
+  random_seed: 'random'
+  # Or you can fix the seed
+  # random_seed: 42
+  scenario: 'scenario1'
+  use_global_defender: False
+  use_dynamic_addresses: False
+  use_firewall: True
+  save_trajectories: False
+  rewards:
+    success: 100
+    step: -1
+    fail: -10
+  actions:
+    scan_network:
+      prob_success: 1.0
+    find_services:
+      prob_success: 1.0
+    exploit_service:
+      prob_success: 1.0
+    find_data:
+      prob_success: 1.0
+    exfiltrate_data:
+      prob_success: 1.0
+    block_ip:
+
+```
+
+El entorno puede iniciarse con: 
+
+```
+python3 -m AIDojoCoordinator.worlds.NSEGameCoordinator \
+  --task_config=./examples/example_config.yaml \
+  --game_port=9000
+```
+
+Tras lo cual se crea el servidor de juego en localhost:9000 al que los agentes pueden conectarse para interactuar en NetSecGame.
+
+#### Docker Container
+
+NetSecGame puede inicializarse mediante un contenedor de Docker. Cuando se ejecuta dentro del entorno Docker, la aplicación puede iniciarse con el siguiente comando:
+
+```
+docker run -it --rm \
+  -v $(pwd)/examples/example_config.yaml:/aidojo/netsecenv_conf.yaml \
+  -v $(pwd)/logs:/aidojo/logs \
+  -p 9000:9000 lukasond/aidojo-coordinator:1.0.2
+```
 
 ### Representación de escenarios
 
