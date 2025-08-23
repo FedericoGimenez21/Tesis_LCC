@@ -26,7 +26,7 @@
    - [Observations](#observations)
 6. [Sistema de recompensas](#sistema-de-recompensas)
    - [Recompensas internas del agente Q-learning](#recompensas-internas-del-agente-q-learning)
-   - [Hallazgos clave](#hallazgos-clave)
+   - [Análisis del diseño](#análisis-del-diseño)
 7. [Selección y especificación de scenario1-full](#selección-y-especificación-de-scenario1-full)
    - [Arquitectura de red](#arquitectura-de-red)
    - [Descripción de nodos](#descripción-de-nodos)
@@ -42,22 +42,22 @@
 
 ## ¿Qué es NetSecGame?
 
-[NetSecGame](https://github.com/stratosphereips/NetSecGame) (Network Security Game) es un framework para el entrenamiento y la evaluación de agentes de IA en tareas de seguridad de red (tanto ofensivas como defensivas). Está desarrollado con el simulador de red [CYST](https://pypi.org/project/cyst/) y permite el desarrollo y la prueba rápidos de agentes de IA en escenarios altamente configurables. Se pueden ver ejemplos de agentes implementados en el submódulo [NetSecGameAgents](https://github.com/stratosphereips/NetSecGameAgents/tree/main). Fue creado por [Stratosphere Research Laboratory](https://www.stratosphereips.org/), el grupo de ciberseguridad del Centro de Inteligencia Artificial de la Facultad de Ingeniería Eléctrica de la Universidad Técnica Checa en Praga. Este grupo trabaja en la intersección de ciberseguridad, aprendizaje automático y asistencia a otros.
+[NetSecGame](https://github.com/stratosphereips/NetSecGame) (Network Security Game) es un framework para el entrenamiento y la evaluación de agentes de IA en tareas de seguridad de red (tanto ofensivas como defensivas). Desarrollado sobre el simulador de red [CYST](https://pypi.org/project/cyst/), permite la creación y prueba eficiente de agentes en escenarios altamente configurables. Ejemplos de agentes implementados pueden encontrarse en el submódulo [NetSecGameAgents](https://github.com/stratosphereips/NetSecGameAgents/tree/main). Este entorno fue desarrollado por el [Stratosphere Research Laboratory](https://www.stratosphereips.org/), grupo de investigación en ciberseguridad perteneciente al Centro de Inteligencia Artificial de la Facultad de Ingeniería Eléctrica de la Universidad Técnica Checa en Praga. Dicho grupo se especializa en la intersección entre ciberseguridad, aprendizaje automático y asistencia técnica.
 
-Se trata de un simulador que modela escenarios realistas de redes computacionales donde los agentes pueden ejecutar acciones típicas de un atacante: reconocimiento, explotación de vulnerabilidades, movimiento lateral y exfiltración de datos.
+NetSecGame modela escenarios realistas de redes computacionales, en los cuales los agentes pueden ejecutar acciones típicas de un atacante, tales como reconocimiento, explotación de vulnerabilidades, movimiento lateral y exfiltración de datos.
 
 ### Objetivo del simulador
 
-El objetivo principal de NetSecGame es proporcionar un entorno controlado y reproducible para:
-- Entrenar y evaluar agentes de aprendizaje por refuerzo en tareas de ciberseguridad
-- Simular ataques en redes computacionales
-- Facilitar la investigación en inteligencia artificial aplicada a la seguridad informática
+El objetivo principal de NetSecGame es proporcionar un entorno controlado y reproducible que permita:
+- Entrenar y evaluar agentes de aprendizaje por refuerzo en tareas de ciberseguridad.
+- Simular ataques en redes computacionales.
+- Facilitar la investigación en inteligencia artificial aplicada a la seguridad informática.
 
 ### Características principales
 
-**Agente atacante**: El simulador se centra en agentes atacantes que deben navegar por redes, descubrir vulnerabilidades y comprometer sistemas para alcanzar objetivos específicos.
+**Agente atacante**: El entorno se centra en agentes atacantes que deben explorar redes, descubrir vulnerabilidades y comprometer sistemas para alcanzar objetivos específicos.
 
-**Entorno de red realista**: Modela topologías de red complejas con hosts, servicios, datos y reglas de conectividad que reflejan entornos empresariales reales.
+**Entorno de red realista**: Simula topologías de red complejas con hosts, servicios, datos y reglas de conectividad que reflejan entornos empresariales reales.
 
 **Simulación de ataques**: Reproduce el ciclo completo de un ataque cibernético: reconocimiento, acceso inicial, escalada de privilegios, movimiento lateral y exfiltración.
 
@@ -71,23 +71,23 @@ El objetivo principal de NetSecGame es proporcionar un entorno controlado y repr
 
 ### Arquitectura general
 
-NetSecGame sigue el paradigma clásico de interacción agente-entorno en aprendizaje por refuerzo:
+NetSecGame adopta el paradigma clásico de interacción agente-entorno propio del aprendizaje por refuerzo. El ciclo de funcionamiento se compone de las siguientes etapas:
 
 1. **Inicialización**: El entorno se configura con una topología de red específica, incluyendo hosts, servicios, datos y reglas de conectividad.
 
 2. **Observación**: El agente recibe una observación del estado actual, que incluye su conocimiento parcial de la red (hosts conocidos, servicios descubiertos, hosts controlados, etc.).
 
-3. **Acción**: El agente selecciona una acción basada en su política actual (escaneo de red, búsqueda de servicios, explotación, etc.).
+3. **Acción**: El agente selecciona una acción conforme a su política actual (por ejemplo, escaneo de red, búsqueda de servicios, explotación de vulnerabilidades).
 
 4. **Transición**: El entorno procesa la acción, actualiza su estado interno y determina si la acción fue exitosa según probabilidades predefinidas.
 
 5. **Recompensa**: Se calcula una recompensa basada en el progreso del agente hacia sus objetivos y el costo de la acción ejecutada.
 
-6. **Iteración**: El proceso se repite hasta que se alcanza una condición de terminación (éxito, límite de acciones, detección).
+6. **Iteración**: El proceso se repite hasta que se alcanza una condición de terminación (éxito, límite de acciones, detección por el defensor).
 
 ### Modo de uso
 
-Es necesario especificar una `task configuration` para iniciar NetSecGame. Para las pruebas realizadas se utilizó la siguiente configuración: 
+Para iniciar NetSecGame, es necesario definir una configuración de tarea `task configuration`. En las pruebas realizadas, se empleó una configuración similar a la siguiente:
 
 ```
 # Configuration file for the NetSecGame environment
@@ -213,7 +213,7 @@ env:
 
 ```
 
-El entorno puede iniciarse con: 
+El entorno se inicia mediante el siguiente comando:
 
 ```
 python3 -m AIDojoCoordinator.worlds.NSEGameCoordinator \
@@ -221,7 +221,7 @@ python3 -m AIDojoCoordinator.worlds.NSEGameCoordinator \
   --game_port=9000
 ```
 
-Tras lo cual se crea el servidor de juego en localhost:9000 al que los agentes pueden conectarse para interactuar en NetSecGame.
+Una vez ejecutado, se crea un servidor de juego en localhost:9000, al cual los agentes pueden conectarse para interactuar con el entorno de NetSecGame.
 
 #### Docker Container
 
@@ -239,15 +239,17 @@ docker run -it --rm \
 
 ### Contexto académico
 
-NetSecGame fue desarrollado en el contexto de investigación académica en ciberseguridad e inteligencia artificial, específicamente para abordar la falta de entornos de simulación realistas y controlados para el entrenamiento de agentes autónomos en tareas de ciberseguridad. En esta línea, también existen otras iniciativas como [CybORG++](https://github.com/alan-turing-institute/CybORG_plus_plus), [CybORG](https://github.com/cage-challenge/CybORG,) [CyGil](https://arxiv.org/abs/2109.03331), [CyberBattleSim](https://github.com/microsoft/CyberBattleSim), [NASimEmu](https://github.com/jaromiru/NASimEmu), [PenGym](https://github.com/cyb3rlab/PenGym) y [CyberGym](https://github.com/sunblaze-ucb/cybergym), que persiguen objetivos similares, aunque con diferentes aproximaciones y niveles de complejidad.
+NetSecGame surge en el marco de la investigación académica en ciberseguridad e inteligencia artificial, con el objetivo de suplir la carencia de entornos de simulación realistas y controlados para el entrenamiento de agentes autónomos en tareas de seguridad informática. En este contexto, existen otras iniciativas con propósitos similares, tales como [CybORG++](https://github.com/alan-turing-institute/CybORG_plus_plus), [CybORG](https://github.com/cage-challenge/CybORG,) [CyGil](https://arxiv.org/abs/2109.03331), [CyberBattleSim](https://github.com/microsoft/CyberBattleSim), [NASimEmu](https://github.com/jaromiru/NASimEmu), [PenGym](https://github.com/cyb3rlab/PenGym) y [CyberGym](https://github.com/sunblaze-ucb/cybergym), cada una con enfoques y niveles de complejidad distintos.
 
 ### Problemas que busca resolver
 
-**Escasez de entornos de entrenamiento**: Los simuladores existentes carecen del realismo necesario.
+NetSecGame aborda diversas limitaciones presentes en los simuladores existentes:
 
-**Evaluación reproducible**: Proporciona un marco controlado donde los experimentos pueden ser repetidos con condiciones idénticas, facilitando la comparación de diferentes enfoques.
+**Escasez de entornos de entrenamiento**: La mayoría de los simuladores no reproducen adecuadamente las condiciones de redes empresariales reales.
 
-**Escalabilidad**: Permite evaluar agentes en escenarios de complejidad variable, desde redes simples hasta topologías empresariales complejas.
+**Evaluación reproducible**: Proporciona un entorno controlado que permite repetir experimentos bajo condiciones idénticas, facilitando la comparación de resultados.
+
+**Escalabilidad**: Permite evaluar agentes en escenarios que varían desde redes simples hasta topologías complejas.
 
 **Seguridad**: Ofrece un entorno seguro para experimentar con técnicas de ataque sin riesgo de dañar sistemas reales.
 
@@ -257,11 +259,11 @@ NetSecGame presenta varias ventajas significativas frente a otros entornos de si
 
 **Modularidad y extensibilidad**: Es muy modular y fácil de extender a nuevas topologías, lo que permite adaptar el entorno a diferentes necesidades de investigación.
 
-**Realismo de la información**: El agente no recibe información auxiliar no realista en el estado. Toda la información disponible corresponde a lo que un atacante real podría obtener.
+**Realismo de la información**: El agente no recibe información artificial; todo dato disponible corresponde a lo que un atacante real podría obtener.
 
-**Objetivo realista**: El objetivo es muy realista: exfiltrar datos hacia Internet, reflejando motivaciones reales de atacantes.
+**Objetivo realista**: La meta principal —exfiltrar datos hacia Internet— refleja motivaciones reales en escenarios de ciberataques.
 
-**Presencia de defensor**: Es posible añadir  un defensor en el entorno, añadiendo una capa de complejidad y realismo a la simulación.
+**Presencia de defensor**: La inclusión de un agente defensor añade complejidad y realismo a la simulación.
 
 **Recompensas genéricas**: Las recompensas no están diseñadas específicamente para el problema particular, sino que son genéricas, lo que mejora la generalización de los enfoques desarrollados.
 
@@ -273,6 +275,8 @@ Si bien NetSecGame cuenta actualmente con un número limitado de citas en public
 
 ### Usos principales
 
+NetSecGame ha sido utilizado en diversos contextos:
+
 **Investigación**: Desarrollo y evaluación de algoritmos de aprendizaje automático para ciberseguridad.
 
 **Docencia**: Enseñanza de conceptos de seguridad informática y técnicas de ataque en un entorno controlado.
@@ -283,17 +287,19 @@ Si bien NetSecGame cuenta actualmente con un número limitado de citas en public
 
 ## Justificación de su elección para esta tesis
 
+La selección de NetSecGame como entorno de simulación se fundamenta en su alineación directa con los objetivos de esta investigación, orientada a mejorar la inicialización de políticas en algoritmos de Q-learning aplicados a ciberseguridad multiagente.
+
 ### Relevancia temática
 
 NetSecGame se alinea perfectamente con los objetivos de esta investigación al proporcionar:
 
-- **Modelado realista**: Representa escenarios de ciberseguridad que reflejan desafíos del mundo real
-- **Complejidad controlada**: Permite evaluar agentes en entornos de complejidad variable
-- **Observabilidad parcial**: Modela la incertidumbre inherente en escenarios de ciberseguridad reales
+- **Modelado realista**: Simula escenarios de ciberseguridad que reflejan desafíos del mundo real.
+- **Complejidad controlada**: Permite evaluar agentes en entornos de complejidad variable.
+- **Observabilidad parcial**: Modela la incertidumbre inherente en escenarios de ciberseguridad reales.
 
 ### Adecuación técnica para Q-learning y ciberseguridad multiagente
 
-El entorno NetSecGame presenta características técnicas específicamente alineadas con los objetivos de mejora de la inicialización de políticas en algoritmos de Q-learning para entornos de ciberseguridad multiagente:
+El entorno presenta características técnicas que lo hacen especialmente adecuado para esta investigación:
 
 - **Representación explícita de estados, acciones y recompensas**: Proporciona estructuras de datos claras y extensibles (GameState, Action, Observation) que facilitan la implementación de Q-learning y la experimentación con diferentes estrategias de inicialización de políticas. 
 
@@ -305,7 +311,7 @@ El entorno NetSecGame presenta características técnicas específicamente aline
 
 ### Espacio controlado y reproducible
 
-**Determinismo configurable**: Permite controlar la aleatoriedad para garantizar reproducibilidad de experimentos.
+**Determinismo configurable**: Posibilita la repetición exacta de experimentos para análisis comparativos.
 
 **Escalabilidad**: Facilita la evaluación desde escenarios simples hasta complejos, permitiendo análisis comparativos sistemáticos.
 
@@ -325,32 +331,26 @@ El entorno NetSecGame presenta características técnicas específicamente aline
 
 **Simplicidad del defensor**: El defensor no es un agente autónomo, sino un sistema estocástico simple.
 
-**Limitaciones de realismo**: Aunque realista, sigue siendo una simplificación de entornos de ciberseguridad reales.
+**Limitaciones de realismo**: Aunque realista, sigue siendo una abstracción de redes reales.
 
 **Dependencias técnicas**: Requiere configuración específica y conocimiento técnico para su uso efectivo.
 
-NetSecGame se presenta como la opción más adecuada para la investigación sobre "Mejora de la inicialización de políticas en algoritmos de Q-learning para entornos de ciberseguridad multiagente" por las siguientes razones fundamentales:
-
-**Alineación temática perfecta**: Combina los dominios de ciberseguridad y aprendizaje por refuerzo de manera natural, proporcionando un contexto realista donde las mejoras en inicialización de políticas tienen impacto directo en la efectividad de agentes atacantes.
-
-**Idoneidad técnica para Q-learning**: Su espacio de estados bien estructurado facilita la implementación de algoritmos tabulares como Q-learning, mientras que sus métricas específicas de ciberseguridad permiten evaluar objetivamente el impacto de diferentes estrategias de inicialización.
-
-**Escalabilidad experimental**: Permite un análisis sistemático desde escenarios simples hasta complejos, facilitando la evaluación gradual de cómo las mejoras en inicialización se comportan según aumenta la complejidad del problema.
-
-**Relevancia práctica**: Los resultados obtenidos en este entorno tienen aplicación directa en problemas reales de ciberseguridad, donde la eficiencia en el aprendizaje de agentes autónomos es crucial para sistemas de detección y respuesta automatizada.
+NetSecGame constituye la plataforma más adecuada para abordar la problemática de inicialización de políticas en Q-learning aplicado a ciberseguridad multiagente. Su diseño técnico, capacidad de simulación realista, y flexibilidad experimental permiten enfocar los esfuerzos de investigación en el análisis profundo del comportamiento de los agentes, garantizando resultados reproducibles y relevantes para aplicaciones reales.
 
 La adopción de NetSecGame permite enfocar completamente los esfuerzos de investigación en el problema específico de inicialización de políticas, aprovechando un entorno maduro, bien documentado y técnicamente robusto que facilitará la obtención de resultados significativos y reproducibles en el área de investigación propuesta.
 
 
--- 
+--- 
 
 ## Arquitectura 
 
-NetSecGame funciona como un servidor de juegos: los agentes se conectan a él mediante sockets TCP e interactúan con el entorno mediante el bucle de comunicación estándar de RL (Reinforcement Learning): el agente envía una acción y recibe nuevas observaciones del entorno. NetSecGame admite simulaciones multiagente en tiempo real altamente personalizables.
+NetSecGame opera como un servidor de simulación que implementa el paradigma clásico de interacción agente-entorno propio del aprendizaje por refuerzo. Los agentes se conectan al servidor mediante sockets TCP y participan en simulaciones en tiempo real, enviando acciones y recibiendo observaciones del entorno en cada iteración del ciclo de entrenamiento.
+
+Este diseño permite ejecutar simulaciones multiagente altamente configurables, en las que cada agente puede actuar de forma autónoma y recibir retroalimentación específica según su desempeño.
 
 ### Componentes del juego
 
-Las siguientes clases se utilizan en el juego para almacenar información sobre su estado. Se utilizan tanto en las `Actions` como en `GameState`.
+El entorno está estructurado en torno a una serie de clases que representan los elementos clave del estado del juego. Estas clases se utilizan tanto en la definición de acciones `Actions` omo en la representación del estado `GameState`.
 
 #### IP
 
@@ -434,7 +434,7 @@ A continuación se presenta una explicación detallada de cada variable:
 
 #### Complejidad del espacio de estados
 
-El espacio de estados presenta un crecimiento exponencial respecto al número de elementos presentes en el entorno, lo que incrementa significativamente la complejidad computacional de los algoritmos de aprendizaje y planificación. La cota superior puede estimarse como:
+El espacio de estados presenta un crecimiento exponencial respecto al número de elementos presentes en el entorno. Esta característica impone desafíos significativos para algoritmos de aprendizaje por refuerzo, especialmente aquellos basados en tablas como Q-learning. La cota superior puede estimarse como:
 
 $$
 \mathcal{O}\left(2^{(n-1)} \cdot 3^{(h-2)} \cdot 2^{(s-1)} \cdot 2^{(d \cdot h)}\right)
@@ -446,7 +446,6 @@ Donde:
 - \( s \): número de servicios
 - \( d \): número de datos por host
 
-Este crecimiento implica una alta complejidad computacional para algoritmos de aprendizaje por refuerzo o planificación secuencial.
 
 La expresión de la cota superior del espacio de estados puede desglosarse de la siguiente manera:
 
@@ -455,33 +454,35 @@ La expresión de la cota superior del espacio de estados puede desglosarse de la
 - $2^s$: Cada uno de los $s$ servicios presentes en el entorno puede ser conocido o desconocido para el agente.
 - $2^{(d \cdot h)}$: Cada uno de los $d$ datos posibles puede estar presente o no en cada uno de los $h$ hosts del entorno.
 
-Este desglose evidencia cómo la combinación de descubrimiento progresivo y control parcial sobre los activos genera un espacio de estados de crecimiento exponencial, lo que plantea desafíos significativos para el diseño y entrenamiento de agentes inteligentes en NetSecGame.
+Este crecimiento exponencial implica que:
+
+- El espacio de búsqueda es enorme, incluso para configuraciones moderadas.
+- La exploración eficiente se vuelve crítica para evitar trayectorias subóptimas.
+- La inicialización de políticas (como las Q-tables) debe considerar estrategias que guíen la exploración hacia regiones prometedoras del espacio.
+- La escalabilidad del algoritmo depende de la capacidad para generalizar y abstraer estados relevantes.
 
 ### Actions
 
-Actualmente, NetSecGame solo soporta agentes atacantes y acciones de ataque (el defensor no es un agente autónomo). Las acciones son los objetos que los agentes envían al entorno. NetSecGame evalúa cada acción y la ejecuta si: 
-1. Es válida.
-2. Puede procesarse en el estado actual del entorno.
-En todos los casos, cuando un agente envía una acción a NetSecGame, recibe una respuesta.
+En NetSecGame, los agentes interactúan con el entorno mediante el envío de acciones estructuradas, que son evaluadas y ejecutadas por el simulador si cumplen con las condiciones de validez y contexto. Actualmente, el entorno está diseñado para agentes atacantes, mientras que el defensor opera como un sistema estocástico no autónomo.
 
-La acción consta de dos partes: 
-1. Tipo de acción: especifica la clase de la acción. 
-2. Parámetros: diccionario con parámetros específicos relacionados con el tipo de acción utilizado.
+Cada acción consta de dos componentes:
+1. Tipo de acción: Define la clase de operación a realizar (por ejemplo, escaneo, explotación, exfiltración). 
+2. Parámetros: Diccionario con los valores específicos requeridos para ejecutar la acción (por ejemplo, IP de origen, red objetivo, servicio a explotar).
 
 #### Lista de tipos de acción
 
-- **JoinGame**, params={agent_info:AgentInfo(<name>, <role>)}: Se utiliza para registrar al agente en un juego con un <role> determinado.
-- **QuitGame**, params={}: Se utiliza para finalizar la interacción del agente.
-- **ResetGame**, params={request_trajectory:bool}: Se utiliza para solicitar el restablecimiento del juego a su posición inicial. Si request_trajectory = True, el coordinador enviará la trayectoria completa de la ejecución anterior en el siguiente mensaje.
+- **JoinGame**, params={agent_info:AgentInfo(<name>, <role>)}: Registra al agente en el entorno con un rol específico.
+- **QuitGame**, params={}: Finaliza la participación del agente en el entorno.
+- **ResetGame**, params={request_trajectory:bool}: Reinicia el entorno. Si request_trajectory = True, el coordinador enviará la trayectoria completa de la ejecución anterior en el siguiente mensaje.
 - **ScanNetwork**, params{source_host:<IP>, target_network:<Network>}: Escanea la <Network> dada desde un host de origen especificado. Detecta TODOS los hosts de una red accesibles desde <IP>. Si la operación es correcta, devuelve el conjunto de objetos <IP> detectados.
-- **FindServices**, params={source_host:<IP>, target_host:<IP>}: Se utiliza para detectar TODOS los servicios que se ejecutan en el target_host si este es accesible desde source_host. Si la operación es correcta, devuelve un conjunto de todos los objetos <Service> detectados.
+- **FindServices**, params={source_host:<IP>, target_host:<IP>}: Detecta todos los servicios que se ejecutan en el target_host si este es accesible desde source_host. Si la operación es correcta, devuelve un conjunto de todos los objetos <Service> detectados.
 - **FindData**, params={source_host:<IP>, target_host:<IP>}: Busca datos en el target_host. Si source_host difiere de target_host, la operación depende de la accesibilidad desde source_host. Si la operación es correcta, devuelve un conjunto de todos los objetos <Data> detectados.
 - **ExploitService**, params={source_host:<IP>, target_host:<IP>, taget_service:<Service>}: Explota el target_service en un target_host especificado. Si tiene éxito, el atacante obtiene el control del target_host.
 - **ExfiltrateData**, params{source_host:<IP>, target_host:<IP>, data:<IP>}: Copia datos del source_host al target_host si ambos están controlados y el target_host es accesible desde el source_host.
 
 #### Impacto de las acciones en el entorno
 
-En la siguiente tabla, se describen los efectos de cada acción y sus precondiciones.
+Cada acción modifica el estado del entorno de forma específica. A continuación se resumen sus efectos y precondiciones:
 
 | Acción          | Parámetros                                           | Precondiciones                                                                 | Efectos                                                       |
 |-----------------|-------------------------------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------------|
@@ -510,10 +511,11 @@ Tras enviar la Acción `a` al entorno, los agentes reciben una `Observation`. Ca
 - end: `bool`, indica si la interacción puede continuar después de ejecutar la Acción `a`; 
 - info: `dict`, marcador de posición para cualquier información proporcionada al agente (p. ej., la razón por la que `end is True`).
 
+Este diseño permite que el agente procese la retroalimentación de forma estructurada, facilitando la actualización de su política de acción y la evaluación de su desempeño en función de los objetivos definidos.
 
 ## Sistema de recompensas
 
-El entorno NetSecGame define una función de recompensa simple, que asigna retroalimentación solo en eventos críticos:
+El sistema de recompensas en NetSecGame está diseñado para proporcionar retroalimentación escasa pero significativa, enfocada en eventos críticos que reflejan el progreso del agente hacia sus objetivos. Esta estructura favorece la evaluación de estrategias de planificación secuencial en entornos de ciberseguridad realistas.
 
 Las recompensas de cada acción son escasas. 
 | Evento                         | Condición                                      | Recompensa del entorno |
@@ -521,6 +523,8 @@ Las recompensas de cada acción son escasas.
 | Paso normal                | No conduce al objetivo ni a detección          | -1                     |
 | Éxito (exfiltración exitosa) | El agente alcanza el estado objetivo           | +100                   |
 | Detección                    | El agente es detectado por el defensor         | -50                    |
+
+Este esquema penaliza el comportamiento ineficiente y recompensa únicamente el logro del objetivo principal, lo que obliga al agente a desarrollar estrategias efectivas y discretas.
 
 ### Recompensas internas del agente Q-learning
 
@@ -539,11 +543,12 @@ Para mejorar la eficiencia del aprendizaje, el agente de Q-learning redefine la 
 | **Detección** | `AgentStatus.Fail` | -1000 | 
 | **Timeout (límite de pasos)** | `AgentStatus.TimeoutReached` |-100 | 
 
+Esta redefinición refuerza el comportamiento deseado (exfiltración sin ser detectado) y proporciona señales más claras para guiar la exploración del agente.
 
-### Hallazgos clave
+### Análisis del diseño
 
 #### Fortalezas principales:
-- **Alineación con los objetivos del entorno**: El rediseño refuerza el comportamiento deseado (exfiltración sin ser detectado).
+- **Alineación con los objetivos del entorno**: La recompensa está directamente vinculada al éxito operativo del agente.
 - **Simplicidad y claridad**: La función es fácil de interpretar y mantener.
 
 
@@ -556,11 +561,14 @@ Para mejorar la eficiencia del aprendizaje, el agente de Q-learning redefine la 
 
 ## Selección y especificación de scenario1-full
 
-La selección del Scenario1 Full dentro de NetSecGame responde a la necesidad de contar con un entorno de simulación lo suficientemente complejo y representativo para evaluar la validez del marco de experimentación propuesto. Este escenario fue elegido por su capacidad de reproducir de manera controlada los desafíos que enfrentan los sistemas de ciberseguridad en contextos corporativos reales, integrando tanto superficies de ataque como mecanismos de defensa que permiten probar el desempeño de los agentes bajo condiciones diversas y exigentes.
+La elección del escenario Scenario1-Full dentro del entorno NetSecGame se fundamenta en su capacidad para representar de manera realista y controlada los desafíos que enfrentan los sistemas de ciberseguridad en entornos corporativos. Este escenario proporciona una base sólida para evaluar el desempeño de agentes de aprendizaje por refuerzo en tareas ofensivas como la exfiltración de datos, el movimiento lateral y la explotación de vulnerabilidades. Este escenario fue elegido por su capacidad de reproducir de manera controlada los desafíos que enfrentan los sistemas de ciberseguridad en contextos corporativos reales, integrando tanto superficies de ataque como mecanismos de defensa que permiten probar el desempeño de los agentes bajo condiciones diversas y exigentes.
 
-El Scenario1 Full de NetSecGame constituye un entorno de simulación de ciberseguridad diseñado para el entrenamiento de agentes de aprendizaje automático en técnicas de penetración y defensa. Este escenario representa una red corporativa compleja que simula un ambiente de seguridad realista, proporcionando un entorno controlado para evaluar las capacidades de los agentes en tareas de exfiltración de datos y movimiento lateral dentro de infraestructuras de red.
+Scenario1-Full fue seleccionado por las siguientes razones:
 
-El diseño del escenario se basa en principios de seguridad de redes empresariales típicas, incorporando múltiples capas de defensa, diversos tipos de sistemas y configuraciones de red que reflejan entornos reales de producción. Esta aproximación permite evaluar la efectividad de diferentes estrategias de ataque y defensa en un contexto controlado pero representativo.
+- Complejidad estructural: Integra múltiples subredes, servicios, usuarios y políticas de acceso que simulan una red empresarial real.
+- Presencia de mecanismos defensivos: Incluye firewalls y segmentación de red que obligan al agente a planificar rutas de ataque sofisticadas.
+- Escalabilidad: Permite extender la arquitectura para evaluar el comportamiento del agente en escenarios más complejos.
+- Relevancia práctica: Refleja situaciones comunes en entornos corporativos, lo que facilita la transferencia de resultados a aplicaciones reales.
 
 ### Arquitectura de red
 
@@ -573,18 +581,18 @@ La arquitectura de red del Scenario1 Full presentada en la Figura N, se estructu
 
 Las subredes están organizadas de la siguiente manera:
 
-- **Subred de servidores**: 192.168.1.0/24 - Aloja los recursos críticos de la organización
-- **Subred de clientes**: 192.168.2.0/24 - Representa las estaciones de trabajo de usuarios finales
-- **Conectividad externa**: 213.47.23.192/26 - Simula la conectividad a Internet
+- **Subred de servidores**: 192.168.1.0/24 - Aloja los recursos críticos de la organización.
+- **Subred de clientes**: 192.168.2.0/24 - Representa las estaciones de trabajo de usuarios finales.
+- **Conectividad externa**: 213.47.23.192/26 - Simula la conectividad a Internet.
 
 ### Router central
 
 El router central, accesible mediante las direcciones 192.168.1.1 y 192.168.2.1, funciona como el punto de control y seguridad de la red. Este dispositivo implementa:
 
-- Funcionalidades de firewall con políticas restrictivas configuradas por defecto (política DENY)
-- Reglas de acceso específicas que regulan la comunicación entre las diferentes subredes
-- Gateway de conectividad externa para operaciones que requieren acceso a Internet
-- Filtrado de tráfico basado en políticas de seguridad predefinidas
+- Funcionalidades de firewall con políticas restrictivas configuradas por defecto (política DENY).
+- Reglas de acceso específicas que regulan la comunicación entre las diferentes subredes.
+- Gateway de conectividad externa para operaciones que requieren acceso a Internet.
+- Filtrado de tráfico basado en políticas de seguridad predefinidas.
 
 
 ### Descripción de nodos
@@ -597,9 +605,9 @@ La subred de servidores contiene cinco sistemas que alojan diferentes servicios 
 
 Este sistema ejecuta Windows Server y proporciona servicios de compartición de archivos mediante el protocolo SMB (Server Message Block). Los servicios configurados incluyen:
 
-- **microsoft-ds**: Servicio SMB/CIFS para compartición de archivos, identificado como vulnerable a exploits remotos
-- **ms-wbt-server**: Servicio de Remote Desktop Protocol para acceso remoto
-- **windows login**: Sistema de autenticación local
+- **microsoft-ds**: Servicio SMB/CIFS para compartición de archivos, identificado como vulnerable a exploits remotos.
+- **ms-wbt-server**: Servicio de Remote Desktop Protocol para acceso remoto.
+- **windows login**: Sistema de autenticación local.
 
 El servidor almacena múltiples conjuntos de datos sensibles: DataFromServer1 (propiedad de User1), Data2FromServer1 (propiedad de User2), y Data3FromServer1 (propiedad de User1). Los usuarios autorizados incluyen User1 a User5 y el usuario Administrator.
 
@@ -609,8 +617,8 @@ La vulnerabilidad del servicio SMB constituye un vector de ataque principal, per
 
 Sistema basado en Linux que aloja servicios de base de datos críticos:
 
-- **ssh**: OpenSSH versión 8.1.0 para acceso remoto seguro
-- **postgresql**: Sistema de gestión de base de datos PostgreSQL versión 14.3.0
+- **ssh**: OpenSSH versión 8.1.0 para acceso remoto seguro.
+- **postgresql**: Sistema de gestión de base de datos PostgreSQL versión 14.3.0.
 
 El servidor contiene DatabaseData (propiedad de User1) y cuenta con usuarios User1 a User5 además del usuario root. El acceso requiere autenticación SSH válida, proporcionando una capa adicional de seguridad comparado con otros servicios.
 
@@ -618,8 +626,8 @@ El servidor contiene DatabaseData (propiedad de User1) y cuenta con usuarios Use
 
 Sistema Linux configurado para servicios web con las siguientes características:
 
-- **http**: Servidor web lighttpd versión 1.4.54
-- **ssh**: OpenSSH versión 8.1.0
+- **http**: Servidor web lighttpd versión 1.4.54.
+- **ssh**: OpenSSH versión 8.1.0.
 
 Almacena WebServerData (propiedad de User2). Los usuarios autorizados incluyen User1 a User5 y root.
 
@@ -627,9 +635,9 @@ Almacena WebServerData (propiedad de User2). Los usuarios autorizados incluyen U
 
 Ambos sistemas ejecutan Linux y proporcionan servicios básicos:
 
-- **ssh**: Acceso remoto únicamente
-- **Usuarios**: Solo el usuario root
-- **Función**: Servidores de propósito general con acceso altamente restringido
+- **ssh**: Acceso remoto únicamente.
+- **Usuarios**: Solo el usuario root.
+- **Función**: Servidores de propósito general con acceso altamente restringido.
 
 Estos nodos sirven como objetivos secundarios y puntos potenciales para movimiento lateral dentro de la red.
 
@@ -641,10 +649,10 @@ La subred de clientes comprende cinco estaciones de trabajo que representan dife
 
 Constituye el punto de ataque principal del escenario:
 
-- **Sistema operativo**: Windows
-- **Servicios**: ms-wbt-server y can_attack_start_here (marcador de punto de inicio)
-- **Servicio especial**: attacker - representa al agente atacante controlado por IA
-- **Usuarios**: User1 y Administrator
+- **Sistema operativo**: Windows.
+- **Servicios**: ms-wbt-server y can_attack_start_here (marcador de punto de inicio).
+- **Servicio especial**: attacker - representa al agente atacante controlado por IA.
+- **Usuarios**: User1 y Administrator.
 
 Este nodo está preconfigurado como el punto de inicio predeterminado para el agente atacante, proporcionando la base para iniciar operaciones de reconocimiento y ataque.
 
@@ -652,23 +660,23 @@ Este nodo está preconfigurado como el punto de inicio predeterminado para el ag
 
 Los clientes restantes proporcionan diversidad en términos de sistemas operativos y configuraciones:
 
-- **Cliente 2** (192.168.2.3): Sistema Windows  y marcador de inicio, usuarios User2 y Administrator
-- **Cliente 3** (192.168.2.4): Sistema Linux con SSH y marcador de inicio, usuarios User3 y root
-- **Cliente 4** (192.168.2.5): Sistema Linux con SSH y marcador de inicio, usuarios User4 y root
-- **Cliente 5** (192.168.2.6): Sistema Linux con acceso solo local, usuarios User5 y root
+- **Cliente 2** (192.168.2.3): Sistema Windows  y marcador de inicio, usuarios User2 y Administrator.
+- **Cliente 3** (192.168.2.4): Sistema Linux con SSH y marcador de inicio, usuarios User3 y root.
+- **Cliente 4** (192.168.2.5): Sistema Linux con SSH y marcador de inicio, usuarios User4 y root.
+- **Cliente 5** (192.168.2.6): Sistema Linux con acceso solo local, usuarios User5 y root.
 
 Esta diversidad permite evaluar la capacidad del agente para adaptarse a diferentes plataformas y configuraciones de seguridad.
 
 #### Nodo externo
 
-##### Outside node (213.47.23.195)
+##### Outside node C&C Server (213.47.23.195)
 
 Representa un sistema externo en Internet configurado específicamente para operaciones de exfiltración:
 
-- **Ubicación**: Internet simulado
-- **Servicios**: listener para recepción de datos exfiltrados
-- **Control**: Bajo control del atacante
-- **Función**: Destino final para la transferencia de datos comprometidos
+- **Ubicación**: Internet simulado.
+- **Servicios**: listener para recepción de datos exfiltrados.
+- **Control**: Bajo control del atacante.
+- **Función**: Destino final para la transferencia de datos comprometidos.
 
 ### Dinámicas del entorno
 
@@ -684,11 +692,11 @@ Esta secuencia requiere que el agente desarrolle estrategias de planificación s
 
 La estrategia de ataque más directa involucra:
 
-1. **Iniciación**: Activación del agente en Cliente 1 con servicio atacante activo
-2. **Reconocimiento**: Escaneo sistemático de la subred de servidores para identificar servicios disponibles
-3. **Explotación**: Utilización del exploit SMB contra el servicio microsoft-ds en el servidor SMB
-4. **Acceso a datos**: Recuperación de archivos críticos almacenados en el sistema comprometido
-5. **Exfiltración**: Transferencia de datos al outside node através de la conectividad externa
+1. **Iniciación**: Activación del agente en Cliente 1 con servicio atacante activo.
+2. **Reconocimiento**: Escaneo sistemático de la subred de servidores para identificar servicios disponibles.
+3. **Explotación**: Utilización del exploit SMB contra el servicio microsoft-ds en el servidor SMB.
+4. **Acceso a datos**: Recuperación de archivos críticos almacenados en el sistema comprometido.
+5. **Exfiltración**: Transferencia de datos al outside node através de la conectividad externa.
 
 #### Configuración de acceso y autenticación
 
@@ -698,17 +706,16 @@ Cada nodo mantiene su propio sistema de usuarios y credenciales:
 
 - **Autenticación local**: Cada sistema gestiona independientemente sus usuarios autorizados
 - **Niveles de privilegio**:
-  - LIMITED: Acceso básico de usuario con permisos restringidos
-  - ELEVATED: Privilegios administrativos con acceso completo al sistema
-
+  - LIMITED: Acceso básico de usuario con permisos restringidos.
+  - ELEVATED: Privilegios administrativos con acceso completo al sistema.
 
 ##### Políticas de firewall
 
 El router central implementa políticas de acceso estrictas:
 
-- **Cadena INPUT**: Permite únicamente acceso directo desde subredes específicamente autorizadas
-- **Cadena FORWARD**: Reglas granulares para comunicación entre subredes
-- **Política predeterminada**: DENY (denegación explícita de todo tráfico no autorizado)
+- **Cadena INPUT**: Permite únicamente acceso directo desde subredes específicamente autorizadas.
+- **Cadena FORWARD**: Reglas granulares para comunicación entre subredes.
+- **Política predeterminada**: DENY (denegación explícita de todo tráfico no autorizado).
 
 Esta configuración refleja las mejores prácticas de seguridad de red, requiriendo que el agente desarrolle estrategias sofisticadas para navegar las restricciones de acceso.
 
@@ -718,17 +725,17 @@ Esta configuración refleja las mejores prácticas de seguridad de red, requirie
 
 El Scenario1 Full presenta un espacio de estados multidimensional caracterizado por:
 
-- **Diez nodos activos**: Cada uno con múltiples servicios y estados de configuración posibles
-- **Servicios heterogéneos**: Diferentes protocolos, versiones y configuraciones de seguridad
-- **Estados de compromiso**: Múltiples niveles de acceso y control por nodo
-- **Distribución de datos**: Información crítica dispersa en varios servidores con diferentes niveles de protección
+- **Diez nodos activos**: Cada uno con múltiples servicios y estados de configuración posibles.
+- **Servicios heterogéneos**: Diferentes protocolos, versiones y configuraciones de seguridad.
+- **Estados de compromiso**: Múltiples niveles de acceso y control por nodo.
+- **Distribución de datos**: Información crítica dispersa en varios servidores con diferentes niveles de protección.
 
 #### Variabilidad del entorno
 
 El entorno presenta características dinámicas que aumentan su complejidad:
 
-- **Múltiples rutas de solución**: Diversas estrategias válidas para alcanzar los objetivos del escenario
-- **Escalabilidad**: Arquitectura base que puede extenderse para crear escenarios de mayor complejidad
+- **Múltiples rutas de solución**: Diversas estrategias válidas para alcanzar los objetivos del escenario.
+- **Escalabilidad**: Arquitectura base que puede extenderse para crear escenarios de mayor complejidad.
 
 
 ### Relevancia para la investigación
@@ -740,7 +747,7 @@ La complejidad inherente del escenario, combinada con sus múltiples rutas de so
 
 ## Análisis de resultados experimentales del algoritmo Q-learning en Scenario1 de NetSecGame
 
-A continuación se presentan resultados obtenidos tras ejecutar 10 iteraciones independientes del algoritmo Q-learning en el Scenario1 Full de NetSecGame, evaluando diferentes configuraciones de episodios de entrenamiento (1,000 a 15,000 episodios). Los datos presentados proporcionan información sobre el rendimiento, consistencia y variabilidad del algoritmo en un entorno de ciberseguridad simulado.
+Se realizaron 10 ejecuciones independientes del algoritmo Q-learning en el escenario Scenario1-Full de NetSecGame, con el objetivo de evaluar el impacto de diferentes configuraciones de entrenamiento sobre el rendimiento del agente atacante. Las configuraciones variaron entre 1,000 y 15,000 episodios, permitiendo observar tendencias de aprendizaje, consistencia y sensibilidad a la aleatoriedad.
 
 ![Distribución de Winrate por episodios de entrenamiento](../../outputs/figures/comparison_analysis/scenario1/winrate_02_boxplot_by_episodes.png)
 *Figura X+1: Distribución de winrate por episodios de entrenamiento. Los boxplots muestran la mediana (línea roja), cuartiles y valores atípicos para cada configuración.*
@@ -796,7 +803,7 @@ La investigación confirma la idoneidad de NetSecGame como plataforma de evaluac
 
 NetSecGame demuestra ser una plataforma competente y técnicamente adecuada para abordar preguntas de investigación sobre inicialización de políticas y comportamiento de agentes en dominios de ciberseguridad. Los resultados actuales sirven como **línea base**: muestran que, con la configuración y algoritmo tabular empleados, el dominio es desafiante y altamente sensible a la aleatoriedad y diseño de recompensas.
 
-En la implementación actual de Q-learning, las políticas derivadas de las Q-tables se inicializan con un valor uniforme de cero para todos los pares estado-acción. Si bien este enfoque garantiza imparcialidad inicial entre todas las acciones posibles, puede inducir trayectorias de aprendizaje subóptimas debido a la ausencia de sesgos exploratorios que orienten al agente hacia regiones prometedoras del espacio de búsqueda.
+La implementación actual de Q-learning, con inicialización uniforme en cero, establece una línea base comparativa para evaluar mejoras algorítmicas. Si bien este enfoque garantiza imparcialidad inicial, puede inducir trayectorias de aprendizaje subóptimas debido a la falta de sesgos exploratorios.
 
 Se propone investigar y evaluar técnicas avanzadas de inicialización de Q-tables y políticas que aceleren la convergencia y mejoren la exploración,tales como:
 
