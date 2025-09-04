@@ -15,167 +15,106 @@ de Q-learning en NetSecGame y los convierte a formato CSV estructurado para aná
 
 def parse_results_md(file_path):
     """
-    Parsea el archivo de resultados en formato markdown y extrae los datos estructurados
-    Maneja tanto datos de prueba cada 1000 episodios como resultados finales
+    Parsea el archivo de resultados en formato markdown y extrae los datos estructurados.
+    Maneja tanto datos de prueba cada N episodios como resultados finales.
+    Permite bloques de test con solo las líneas mínimas.
     """
-    # Verificar que el archivo existe
     if not file_path.exists():
         raise FileNotFoundError(f"Archivo no encontrado: {file_path}")
-    
+
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
-    
+
     data = []
-    
-    # Patrón para extraer datos de pruebas cada 1000 episodios
-    test_pattern = r'Tested for (\d+) episodes after (\d+) training episode\.\s*' \
-                   r'Wins=(\d+),\s*' \
-                   r'Detections=(\d+),\s*' \
-                   r'winrate=([\d.]+)%,\s*' \
-                   r'detection_rate=([\d.]+)%,\s*' \
-                   r'average_returns=([-\d.]+) \+- ([\d.]+),\s*' \
-                   r'average_episode_steps=([\d.]+) \+- ([\d.]+),\s*' \
-                   r'average_win_steps=([\d.]+) \+- ([\d.]+),\s*' \
-                   r'average_detected_steps=([\d.nan]+) \+- ([\d.nan]+)\s*' \
-                   r'average_max_steps_steps=([\d.]+) \+- ([\d.]+),\s*' \
-                   r'epsilon=([\d.]+)'
-    
-    # Buscar todas las coincidencias de pruebas cada 1000 episodios
-    test_matches = re.finditer(test_pattern, content, re.MULTILINE | re.DOTALL)
-    
-    for match in test_matches:
-        try:
-            test_episodes = int(match.group(1))
-            training_episodes = int(match.group(2))
-            wins = int(match.group(3))
-            detections = int(match.group(4))
-            winrate = float(match.group(5))
-            detection_rate = float(match.group(6))
-            avg_returns = float(match.group(7))
-            std_returns = float(match.group(8))
-            avg_episode_steps = float(match.group(9))
-            std_episode_steps = float(match.group(10))
-            avg_win_steps = float(match.group(11))
-            std_win_steps = float(match.group(12))
-            
-            # Manejar valores nan en average_detected_steps
-            avg_detected_steps_str = match.group(13)
-            std_detected_steps_str = match.group(14)
-            avg_detected_steps = np.nan if avg_detected_steps_str == 'nan' else float(avg_detected_steps_str)
-            std_detected_steps = np.nan if std_detected_steps_str == 'nan' else float(std_detected_steps_str)
-            
-            avg_max_steps_steps = float(match.group(15))
-            std_max_steps_steps = float(match.group(16))
-            epsilon_val = float(match.group(17))
-            
-            # Limpiar epsilon a valores estándar
-            epsilon_clean = round(epsilon_val, 2)
-            
-            data.append({
-                'experiment_id': f'test_{training_episodes:05d}',
-                'model_name': f'Model_test_{training_episodes}',
-                'test_episodes': test_episodes,
-                'training_episodes': training_episodes,
-                'wins': wins,
-                'detections': detections,
-                'winrate': winrate,
-                'detection_rate': detection_rate,
-                'avg_returns': avg_returns,
-                'std_returns': std_returns,
-                'avg_episode_steps': avg_episode_steps,
-                'std_episode_steps': std_episode_steps,
-                'avg_win_steps': avg_win_steps,
-                'std_win_steps': std_win_steps,
-                'avg_detected_steps': avg_detected_steps,
-                'std_detected_steps': std_detected_steps,
-                'avg_max_steps_steps': avg_max_steps_steps,
-                'std_max_steps_steps': std_max_steps_steps,
-                'current_epsilon': epsilon_clean,
-                'data_type': 'test_checkpoint',
-                'scenario': extract_scenario_from_filename(file_path),
-                'algorithm': 'q_learning',
-                'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-            })
-            
-        except Exception as e:
-            print(f"Error procesando test checkpoint en episodio {match.group(2)}: {e}")
-            continue
-    
-    # Patrón para extraer resultado final
-    final_pattern = r'Final model performance after (\d+) episodes\.\s*' \
-                    r'Wins=(\d+),\s*' \
-                    r'Detections=(\d+),\s*' \
-                    r'winrate=([\d.]+)%,\s*' \
-                    r'detection_rate=([\d.]+)%,\s*' \
-                    r'average_returns=([-\d.]+) \+- ([\d.]+),\s*' \
-                    r'average_episode_steps=([\d.]+) \+- ([\d.]+),\s*' \
-                    r'average_win_steps=([\d.]+) \+- ([\d.]+),\s*' \
-                    r'average_detected_steps=([\d.nan]+) \+- ([\d.nan]+)\s*' \
-                    r'average_max_steps_steps=([\d.]+) \+- ([\d.]+),\s*' \
-                    r'epsilon=([\d.]+)'
-    
-    # Buscar resultado final
-    final_match = re.search(final_pattern, content, re.MULTILINE | re.DOTALL)
-    
-    if final_match:
-        try:
-            final_episodes = int(final_match.group(1))
-            wins = int(final_match.group(2))
-            detections = int(final_match.group(3))
-            winrate = float(final_match.group(4))
-            detection_rate = float(final_match.group(5))
-            avg_returns = float(final_match.group(6))
-            std_returns = float(final_match.group(7))
-            avg_episode_steps = float(final_match.group(8))
-            std_episode_steps = float(final_match.group(9))
-            avg_win_steps = float(final_match.group(10))
-            std_win_steps = float(final_match.group(11))
-            
-            # Manejar valores nan en average_detected_steps
-            avg_detected_steps_str = final_match.group(12)
-            std_detected_steps_str = final_match.group(13)
-            avg_detected_steps = np.nan if avg_detected_steps_str == 'nan' else float(avg_detected_steps_str)
-            std_detected_steps = np.nan if std_detected_steps_str == 'nan' else float(std_detected_steps_str)
-            
-            avg_max_steps_steps = float(final_match.group(14))
-            std_max_steps_steps = float(final_match.group(15))
-            epsilon_val = float(final_match.group(16))
-            
-            # Limpiar epsilon a valores estándar
-            epsilon_clean = round(epsilon_val, 2)
-            
-            data.append({
-                'experiment_id': f'final_{final_episodes:05d}',
-                'model_name': f'Model_final_{final_episodes}',
-                'test_episodes': None,
-                'training_episodes': final_episodes,
-                'wins': wins,
-                'detections': detections,
-                'winrate': winrate,
-                'detection_rate': detection_rate,
-                'avg_returns': avg_returns,
-                'std_returns': std_returns,
-                'avg_episode_steps': avg_episode_steps,
-                'std_episode_steps': std_episode_steps,
-                'avg_win_steps': avg_win_steps,
-                'std_win_steps': std_win_steps,
-                'avg_detected_steps': avg_detected_steps,
-                'std_detected_steps': std_detected_steps,
-                'avg_max_steps_steps': avg_max_steps_steps,
-                'std_max_steps_steps': std_max_steps_steps,
-                'current_epsilon': epsilon_clean,
-                'data_type': 'final_result',
-                'scenario': extract_scenario_from_filename(file_path),
-                'algorithm': 'q_learning',
-                'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-            })
-            
-        except Exception as e:
-            print(f"Error procesando resultado final: {e}")
-    
+
+    # Patrón para bloques de test (mínimo: encabezado, Wins, epsilon)
+    test_block_pattern = r'Tested for (\d+) episodes after (\d+) training episode\.(.*?)(?=Tested for |\Z|Final model performance)'
+    test_blocks = re.findall(test_block_pattern, content, re.DOTALL)
+
+    for test_episodes, training_episodes, block in test_blocks:
+        # Extraer valores presentes
+        wins = re.search(r'Wins=(\d+)', block)
+        epsilon = re.search(r'epsilon=([\d.]+)', block)
+        detections = re.search(r'Detections=(\d+)', block)
+        winrate = re.search(r'winrate=([\d.]+)%', block)
+        detection_rate = re.search(r'detection_rate=([\d.]+)%', block)
+        avg_returns = re.search(r'average_returns=([-\d.]+) \+- ([\d.]+)', block)
+        avg_episode_steps = re.search(r'average_episode_steps=([\d.]+) \+- ([\d.]+)', block)
+        avg_win_steps = re.search(r'average_win_steps=([\d.]+) \+- ([\d.]+)', block)
+        avg_detected_steps = re.search(r'average_detected_steps=([\d.nan]+) \+- ([\d.nan]+)', block)
+        avg_max_steps_steps = re.search(r'average_max_steps_steps=([\d.]+) \+- ([\d.]+)', block)
+
+        # Asignar valores, usando np.nan o None si no están presentes
+        data.append({
+            'experiment_id': f'test_{int(training_episodes):05d}',
+            'model_name': f'Model_test_{training_episodes}',
+            'test_episodes': int(test_episodes),
+            'training_episodes': int(training_episodes),
+            'wins': int(wins.group(1)) if wins else np.nan,
+            'detections': int(detections.group(1)) if detections else np.nan,
+            'winrate': float(winrate.group(1)) if winrate else np.nan,
+            'detection_rate': float(detection_rate.group(1)) if detection_rate else np.nan,
+            'avg_returns': float(avg_returns.group(1)) if avg_returns else np.nan,
+            'std_returns': float(avg_returns.group(2)) if avg_returns else np.nan,
+            'avg_episode_steps': float(avg_episode_steps.group(1)) if avg_episode_steps else np.nan,
+            'std_episode_steps': float(avg_episode_steps.group(2)) if avg_episode_steps else np.nan,
+            'avg_win_steps': float(avg_win_steps.group(1)) if avg_win_steps else np.nan,
+            'std_win_steps': float(avg_win_steps.group(2)) if avg_win_steps else np.nan,
+            'avg_detected_steps': np.nan if not avg_detected_steps else (np.nan if avg_detected_steps.group(1) == 'nan' else float(avg_detected_steps.group(1))),
+            'std_detected_steps': np.nan if not avg_detected_steps else (np.nan if avg_detected_steps.group(2) == 'nan' else float(avg_detected_steps.group(2))),
+            'avg_max_steps_steps': float(avg_max_steps_steps.group(1)) if avg_max_steps_steps else np.nan,
+            'std_max_steps_steps': float(avg_max_steps_steps.group(2)) if avg_max_steps_steps else np.nan,
+            'current_epsilon': float(epsilon.group(1)) if epsilon else np.nan,
+            'data_type': 'test_checkpoint',
+            'scenario': extract_scenario_from_filename(file_path),
+            'algorithm': 'q_learning',
+            'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        })
+
+    # Patrón para resultado final (igual que antes)
+    final_pattern = r'Final model performance after (\d+) episodes\.(.*?)(?=Tested for |\Z)'
+    final_blocks = re.findall(final_pattern, content, re.DOTALL)
+    for final_episodes, block in final_blocks:
+        wins = re.search(r'Wins=(\d+)', block)
+        epsilon = re.search(r'epsilon=([\d.]+)', block)
+        detections = re.search(r'Detections=(\d+)', block)
+        winrate = re.search(r'winrate=([\d.]+)%', block)
+        detection_rate = re.search(r'detection_rate=([\d.]+)%', block)
+        avg_returns = re.search(r'average_returns=([-\d.]+) \+- ([\d.]+)', block)
+        avg_episode_steps = re.search(r'average_episode_steps=([\d.]+) \+- ([\d.]+)', block)
+        avg_win_steps = re.search(r'average_win_steps=([\d.]+) \+- ([\d.]+)', block)
+        avg_detected_steps = re.search(r'average_detected_steps=([\d.nan]+) \+- ([\d.nan]+)', block)
+        avg_max_steps_steps = re.search(r'average_max_steps_steps=([\d.]+) \+- ([\d.]+)', block)
+
+        data.append({
+            'experiment_id': f'final_{int(final_episodes):05d}',
+            'model_name': f'Model_final_{final_episodes}',
+            'test_episodes': None,
+            'training_episodes': int(final_episodes),
+            'wins': int(wins.group(1)) if wins else np.nan,
+            'detections': int(detections.group(1)) if detections else np.nan,
+            'winrate': float(winrate.group(1)) if winrate else np.nan,
+            'detection_rate': float(detection_rate.group(1)) if detection_rate else np.nan,
+            'avg_returns': float(avg_returns.group(1)) if avg_returns else np.nan,
+            'std_returns': float(avg_returns.group(2)) if avg_returns else np.nan,
+            'avg_episode_steps': float(avg_episode_steps.group(1)) if avg_episode_steps else np.nan,
+            'std_episode_steps': float(avg_episode_steps.group(2)) if avg_episode_steps else np.nan,
+            'avg_win_steps': float(avg_win_steps.group(1)) if avg_win_steps else np.nan,
+            'std_win_steps': float(avg_win_steps.group(2)) if avg_win_steps else np.nan,
+            'avg_detected_steps': np.nan if not avg_detected_steps else (np.nan if avg_detected_steps.group(1) == 'nan' else float(avg_detected_steps.group(1))),
+            'std_detected_steps': np.nan if not avg_detected_steps else (np.nan if avg_detected_steps.group(2) == 'nan' else float(avg_detected_steps.group(2))),
+            'avg_max_steps_steps': float(avg_max_steps_steps.group(1)) if avg_max_steps_steps else np.nan,
+            'std_max_steps_steps': float(avg_max_steps_steps.group(2)) if avg_max_steps_steps else np.nan,
+            'current_epsilon': float(epsilon.group(1)) if epsilon else np.nan,
+            'data_type': 'final_result',
+            'scenario': extract_scenario_from_filename(file_path),
+            'algorithm': 'q_learning',
+            'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        })
+
     if not data:
         raise ValueError("No se encontraron datos válidos en el archivo")
-    
+
     return pd.DataFrame(data)
 
 def extract_scenario_from_filename(file_path):
