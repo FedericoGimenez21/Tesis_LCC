@@ -68,7 +68,7 @@ Donde:
 
 ### 2.3 Caso de estudio
 
-**Estado del entorno ejemplo:**
+**Ejemplo de estado:**
 ```
     """
     nets:[192.168.1.0/24,192.168.2.0/24,192.168.3.0/24,213.47.23.192/26],
@@ -160,7 +160,7 @@ Final model performance after 15000 episodes.
                 average_max_steps_steps=0.000 +- 0.000,
                 epsilon=0.9
 ```
-#### Training y testing en entorno dinámico
+#### 3.2.2 Experimento 3: Training y testing en entorno dinámico
 
 Se realizó 1 ejecución de entrenamiento independiente del algoritmo utilizando la configuracion del entorno [netsecenv_conf_dyn.yaml](#netsecenv_conf_dynyaml). El rendimiento de winrate del mismo se presenta en la Figura 2.  
 
@@ -184,7 +184,7 @@ Final model performance after 15000 episodes.
                 epsilon=0.9
 ```
 
-### 3.3 Interpretación de resultados
+### 3.4 Interpretación de resultados
 
 Los resultados experimentales revelan una **limitación fundamental** en la representación de características propuesta:
 
