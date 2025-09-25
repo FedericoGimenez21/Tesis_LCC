@@ -108,11 +108,16 @@ python q_agent_feature_based.py --episodes 15000
 Se realizaron 10 ejecuciones independientes del algoritmo utilizando la configuracion del entorno [netsecenv_conf.yaml](#netsecenv_confyaml). Tras ello se recopilo todos los resultados obtenidos y se graficó la distribucion a traves de un grafico de cajas (ver Figura 2). 
 
 ![Distribución de Winrate por episodios de entrenamiento](../../outputs/figures/comparison_analysis/scenario1-feature-based-v2/winrate_02_boxplot_by_episodes.png)
-*Figura 2: Distribución de winrate por episodios de entrenamiento en base a 10 ejecuciones. Los boxplots muestran la mediana (línea roja) y cuartiles.*
+*Figura 1: Distribución de winrate por episodios de entrenamiento en base a 10 ejecuciones de q-learning-feature-based sobre scenario1. Los boxplots muestran la mediana (línea roja) y cuartiles.*
 
 Se seleccionó un modelo `.pickle` y se procedio a realizar los siguientes experimentos: 
 - Testear el modelo con la misma configuracion de entorno que en entrenamiento con direcciones IP y topologia de red fijas.
 - Testear el modelo modificando aleatoriamente las direcciones IP al inicio de cada episodio.
+
+Utilizando el siguiente comando para testing: 
+```bash
+python .\q_agent_feature_based.py --testing True  --previous_model q_agent_marl.experiment.pickle
+```
 
 #### 3.2.1 Experimento 1: Entorno estático
 
@@ -151,6 +156,29 @@ Final model performance after 15000 episodes.
                 average_returns=-40.307 +- 249.197,
                 average_episode_steps=98.426 +- 8.136,
                 average_win_steps=70.988 +- 20.582,
+                average_detected_steps=nan +- nan
+                average_max_steps_steps=0.000 +- 0.000,
+                epsilon=0.9
+```
+#### Training y testing en entorno dinámico
+
+Se realizó 1 ejecución de entrenamiento independiente del algoritmo utilizando la configuracion del entorno [netsecenv_conf_dyn.yaml](#netsecenv_conf_dynyaml). El rendimiento de winrate del mismo se presenta en la Figura 2.  
+
+![Grafico de barras de winrate por episodio de entrenamiento](../../outputs/figures/comparison_analysis/scenario-feature-based-dynamic/winrate_01_bars_by_episodes.png)
+*Figura 2: Resultados de una ejecucion de entrenamiento de q-learning-feature-based sobre scenario1 y entorno dinamico.*
+
+Al testear el modelo bajo el mismo entorno dinámico, se obtuvieron los siguientes resultados: 
+
+```
+Final model performance after 15000 episodes.
+                Wins=811,
+                Detections=0,
+                winrate=5.407%,
+                Detections=0,
+                winrate=5.407%,
+                average_returns=-40.527 +- 248.764,
+                average_episode_steps=98.349 +- 8.503,
+                average_win_steps=69.466 +- 21.338,
                 average_detected_steps=nan +- nan
                 average_max_steps_steps=0.000 +- 0.000,
                 epsilon=0.9

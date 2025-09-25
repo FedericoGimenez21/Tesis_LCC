@@ -1,0 +1,17 @@
+experiment_id,model_name,test_episodes,training_episodes,wins,detections,winrate,detection_rate,avg_returns,std_returns,avg_episode_steps,std_episode_steps,avg_win_steps,std_win_steps,avg_detected_steps,std_detected_steps,avg_max_steps_steps,std_max_steps_steps,current_epsilon,data_type,scenario,algorithm,timestamp
+test_01000,Model_test_1000,250.0,1000,13,0,5.2,0.0,-42.8,244.23,98.408,7.956,69.385,18.134,,,0.0,0.0,0.8,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_02000,Model_test_2000,250.0,2000,8,0,3.2,0.0,-64.8,193.6,99.088,5.965,71.5,18.042,,,0.0,0.0,0.7000000000000001,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_03000,Model_test_3000,250.0,3000,17,0,6.8,0.0,-25.2,276.92,98.264,8.225,74.471,19.686,,,0.0,0.0,0.6,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_04000,Model_test_4000,250.0,4000,14,0,5.6,0.0,-38.4,252.914,98.212,8.309,68.071,16.451,,,0.0,0.0,0.5,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_05000,Model_test_5000,250.0,5000,13,0,5.2,0.0,-42.8,244.23,98.172,9.026,64.846,19.876,,,0.0,0.0,0.4,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_06000,Model_test_6000,250.0,6000,9,0,3.6,0.0,-60.4,204.919,99.032,6.47,73.111,21.584,,,0.0,0.0,0.30000000000000004,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_07000,Model_test_7000,250.0,7000,13,0,5.2,0.0,-42.8,244.23,98.556,7.4,72.231,17.949,,,0.0,0.0,0.2,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_08000,Model_test_8000,250.0,8000,10,0,4.0,0.0,-56.0,215.555,98.264,9.146,56.6,16.83,,,0.0,0.0,0.1,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_09000,Model_test_9000,250.0,9000,12,0,4.8,0.0,-47.2,235.143,98.952,6.267,78.167,19.087,,,0.0,0.0,0.1,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_10000,Model_test_10000,250.0,10000,19,0,7.6,0.0,-16.4,291.498,97.536,11.186,67.579,25.982,,,0.0,0.0,0.1,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_11000,Model_test_11000,250.0,11000,10,0,4.0,0.0,-56.0,215.555,99.008,5.825,75.2,16.061,,,0.0,0.0,0.1,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_12000,Model_test_12000,250.0,12000,12,0,4.8,0.0,-47.2,235.143,98.56,8.715,70.0,26.935,,,0.0,0.0,0.1,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_13000,Model_test_13000,250.0,13000,11,0,4.4,0.0,-51.6,225.605,98.48,8.536,65.455,22.693,,,0.0,0.0,0.1,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_14000,Model_test_14000,250.0,14000,10,0,4.0,0.0,-56.0,215.555,98.96,6.907,74.0,23.315,,,0.0,0.0,0.1,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+test_15000,Model_test_15000,250.0,15000,14,0,5.6,0.0,-38.4,252.914,98.936,5.711,81.0,15.543,,,0.0,0.0,0.1,test_checkpoint,unknown,q_learning,2025-09-25_15-32-54
+final_15000,Model_final_15000,,15000,837,0,5.58,0.0,-38.62,252.489,98.291,8.609,69.379,21.046,,,0.0,0.0,0.1,final_result,unknown,q_learning,2025-09-25_15-32-54
