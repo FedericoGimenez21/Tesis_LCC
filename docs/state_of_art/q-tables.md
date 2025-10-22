@@ -2,15 +2,45 @@
 
 ## Resumen ejecutivo
 
-Q-Learning es un algoritmo central en el aprendizaje por refuerzo sin modelo, ampliamente utilizado para resolver problemas de toma de decisiones secuenciales en entornos inciertos. Su objetivo principal es permitir que un agente aprenda una política óptima —es decir, una estrategia de acciones que maximice la recompensa acumulada— dentro de un Proceso de Decisión de Markov (MDP). Para lograrlo, el algoritmo mantiene una Q-Table, una estructura de datos que almacena los valores Q, los cuales representan la recompensa esperada al ejecutar una acción específica en un determinado estado y seguir una política óptima a futuro. Estos valores se actualizan iterativamente utilizando la ecuación de Bellman, lo que permite que el agente mejore progresivamente su comportamiento mediante prueba y error, sin necesidad de conocer previamente el modelo del entorno [1]. Un aspecto crítico del proceso es la inicialización de la Q-Table, ya que los valores asignados inicialmente determinan la estrategia de exploración temprana del agente y, en consecuencia, afectan la velocidad de convergencia y la eficacia del aprendizaje. Entre las técnicas más comunes se encuentran la inicialización con ceros, con valores aleatorios pequeños o con valores optimistas. Cada una de estas estrategias influye directamente en el equilibrio entre exploración y explotación, así como en la dinámica general del proceso de aprendizaje.
+Q-Learning es un algoritmo central en el aprendizaje por refuerzo sin modelo, ampliamente utilizado para resolver problemas de toma de decisiones secuenciales en entornos inciertos. Su objetivo principal es permitir que un agente aprenda una política óptima —es decir, una estrategia de acciones que maximice la recompensa acumulada— dentro de un Proceso de Decisión de Markov (MDP). Para lograrlo, el algoritmo mantiene una Q-Table, una estructura de datos que almacena los valores Q, los cuales representan la recompensa esperada al ejecutar una acción específica en un determinado estado y seguir una política óptima a futuro. Estos valores se actualizan iterativamente utilizando la ecuación de Bellman, lo que permite que el agente mejore progresivamente su comportamiento mediante prueba y error, sin necesidad de conocer previamente el modelo del entorno [1]. 
+
+Un aspecto crítico del proceso es la inicialización de la Q-Table, ya que los valores asignados inicialmente determinan la estrategia de exploración temprana del agente y, en consecuencia, afectan la velocidad de convergencia y la eficacia del aprendizaje. Entre las técnicas más comunes se encuentran la inicialización con ceros, con valores aleatorios pequeños o con valores optimistas. Cada una de estas estrategias influye directamente en el equilibrio entre exploración y explotación, así como en la dinámica general del proceso de aprendizaje.
 
 Este informe detallará estas técnicas, y sus fundamentos teóricos. 
 
-## Tecnicas principales de inicializacion de Q-tables
+## Ecuacion de actualizacion de Q-learning
 
-La inicialización de las funciones de valor, específicamente las Q-Tables, en algoritmos de Reinforcement Learning (RL) es un aspecto crucial que influye significativamente en la eficiencia y la rapidez de convergencia del aprendizaje. Tradicionalmente, las Q-Tables se inicializan en cero, aleatoriamente o de manera optimista, lo que puede limitar la exploración inicial y prolongar el proceso de aprendizaje. Sin embargo, recientes avances en la integración de técnicas evolutivas y de evolución de políticas (Policy Evolution) ofrecen nuevas perspectivas para pre-entrenar y optimizar estas tablas, facilitando una mejor exploración y un rendimiento superior desde las etapas iniciales del entrenamiento.
+El aprendizaje en Q-Learning es una de las implementaciones más influyentes del Aprendizaje por Diferencias Temporales (Temporal-Difference o TD Learning), como lo definen Sutton y Barto [2]. A diferencia de los métodos de Monte Carlo que esperan hasta el final de un episodio para actualizar el valor, el aprendizaje TD actualiza sus estimaciones en cada paso (un proceso llamado *bootstrapping*). Es un algoritmo off-policy, lo que significa que aprende el valor de la política óptima independientemente de la política que el agente esté siguiendo para explorar [1, 2]. Después de que el agente ejecuta una acción `a` en un estado `s`, observa la recompensa inmediata `r` y el nuevo estado `s'`, el valor `Q(s, a)` se actualiza utilizando una regla derivada de la ecuación de Bellman:
 
-Este informe profundiza en los métodos que combinan la evolución de políticas con la inicialización de Q-Tables en algoritmos de RL, analizando las bases teóricas, las metodologías existentes y las ventajas potenciales de estos enfoques.
+![BellmanEquation](../images/Q-learning-bellman.jpg)
+*Figura 1: Desglose de la Ecuación de Actualización de Q-Learning. La imagen ilustra los componentes de la regla de actualización de Q-Learning, incluyendo el Error de Diferencia Temporal (TD Error). Adaptado de "Deep Reinforcement Learning Course: Part 2", por T. Simonini, 2022, Hugging Face (https://huggingface.co/blog/deep-rl-q-part2).*
+
+Un desglose detallado de sus componentes revela su lógica:
+
+- $Q(s, a)$: Es la estimación actual del valor Q para el par estado-acción $(s, a)$.
+
+- $\alpha$: La tasa de aprendizaje (learning rate), es un factor que determina el tamaño del paso para actualizar el valor Q. Un valor alto (cercano a 1) significa que el agente depende en gran medida de la experiencia más reciente, lo que podría resultar en un aprendizaje más rápido, pero menos estable. Un valor bajo (cercano a 0) significa que el agente actualiza los valores Q más lentamente, con un paso más pequeño según la nueva información, lo que puede resultar en un aprendizaje más estable, pero podría ser más lento en converger. 
+
+- $r + \gamma \max_{a'} Q(s', a')$: Este término se conoce como el TD Target (Objetivo de Diferencia Temporal). Es una nueva estimación, más informada, del valor de $Q(s, a)$. Se compone de la recompensa real e inmediata $r$ y la estimación descontada del valor óptimo futuro, $\gamma \max_{a'} Q(s', a')$. El término $\max_{a'} Q(s', a')$ es la estimación del agente de la máxima recompensa acumulada que puede obtener desde el nuevo estado $s'$. Es este término de maximización el que hace que el algoritmo sea off-policy, ya que evalúa la optimalidad desde $s'$ sin importar qué acción se tomará realmente en el siguiente paso.
+
+- $[r + \gamma \max_{a'} Q(s', a') - Q(s, a)]$: Esta diferencia es el TD Error (Error de Diferencia Temporal). Mide la discrepancia entre la nueva estimación (el TD Target) y la estimación antigua ($Q(s, a)$). El algoritmo actualiza el valor Q en una fracción $\alpha$ de este error, moviendo la estimación antigua hacia el objetivo.
+
+En su forma más simple, conocida como Q-learning tabular, el algoritmo almacena todos los valores Q en una tabla o matriz de dimensiones $|S| \times |A|$, llamada Q-table.  Cada celda de la tabla, $Q(s, a)$, contiene la estimación actual de la calidad de tomar la acción $a$ en el estado $s$. El proceso algorítmico de Q-Learning presentado en la Figura 2, se puede resumir en el siguiente bucle de entrenamiento:
+
+- Inicializar la Q-Table: Crear la tabla Q(S, A) para todos los pares estado-acción. (Aquí se aplican las técnicas de inicialización a cero, aleatoria, u optimista descritas en la siguiente sección).
+
+- Elegir una acción: Para el estado actual S, seleccionar una acción A usando una política (ej. Epsilon-Greedy) que balancee exploración y explotación.
+
+- Realizar la acción: Ejecutar A, observar la recompensa R y el nuevo estado S'.
+
+- Actualizar: Aplicar la regla de actualización de Q-Learning para el par Q(S, A).
+
+![Q-learning-Algorithm](../images/q-learning-algorithm.png)
+*Figura 2: Pseudocódigo del algoritmo Q-Learning, detallando el bucle de interacción agente-entorno y la regla de actualización. Adaptado de Sutton y Barto [2].*
+
+## Técnicas principales de inicialización de Q-tables
+
+La inicialización de las funciones de valor, específicamente las Q-Tables, es un aspecto crucial que influye significativamente en la eficiencia y la rapidez de convergencia del aprendizaje [2]. La estrategia de inicialización determina la postura inicial del agente frente a la incertidumbre, impactando directamente su estrategia de exploración temprana. Se han establecido varias metodologías canónicas, que van desde enfoques neutrales (como la inicialización a ceros) hasta estrategias que fomentan activamente la exploración (como la inicialización optimista). Este apartado analiza las técnicas fundamentales y culmina con enfoques híbridos avanzados que buscan optimizar este punto de partida.
 
 ### Inicialización a ceros
 
