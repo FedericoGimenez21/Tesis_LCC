@@ -187,6 +187,104 @@ Si = sobol.analyze(problem, Y, calc_second_order=True)
 # Retorna: S1, S1_conf, ST, ST_conf, S2, S2_conf
 ```
 
+### 4.5 Funcionamiento Detallado de `sobol.analyze()`
+
+La función `sobol.analyze()` es el núcleo del análisis de sensibilidad en SALib. A continuación se describe su funcionamiento interno:
+
+#### 4.5.1 Firma de la Función
+
+```python
+sobol.analyze(problem, Y, calc_second_order=True, num_resamples=100, 
+              conf_level=0.95, print_to_console=False, seed=None)
+```
+
+**Parámetros principales**:
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `problem` | `dict` | Diccionario con `num_vars`, `names` y `bounds` |
+| `Y` | `np.ndarray` | Vector de salidas del modelo (shape: `N*(2k+2)` o `N*(k+2)`) |
+| `calc_second_order` | `bool` | Si `True`, calcula índices de interacción $S_{ij}$ |
+| `num_resamples` | `int` | Número de remuestreos bootstrap para intervalos de confianza |
+| `conf_level` | `float` | Nivel de confianza para los intervalos (default: 0.95) |
+| `seed` | `int` | Semilla para reproducibilidad del bootstrap |
+
+#### 4.5.2 Estructura Interna del Algoritmo
+
+**Paso 1: Validación y Reestructuración de Datos**
+
+La función primero valida que el tamaño de `Y` sea consistente con el esquema de muestreo de Saltelli:
+
+```python
+# Verificación interna
+if calc_second_order:
+    expected_size = N * (2 * k + 2)
+else:
+    expected_size = N * (k + 2)
+```
+
+**Paso 2: Separación de Matrices de Evaluación**
+
+El vector `Y` se reestructura en las evaluaciones correspondientes a cada matriz:
+
+$$Y = [f(\mathbf{A}), f(\mathbf{B}), f(\mathbf{A}_B^{(1)}), ..., f(\mathbf{A}_B^{(k)}), f(\mathbf{B}_A^{(1)}), ..., f(\mathbf{B}_A^{(k)})]$$
+
+Internamente:
+```python
+# Pseudocódigo de la separación
+A = Y[0:N]           # Evaluaciones de matriz A
+B = Y[N:2*N]         # Evaluaciones de matriz B
+AB = Y[2*N:].reshape(k, N)  # Matrices A_B^(i)
+```
+
+**Paso 3: Cálculo de Índices de Primer Orden ($S_1$)**
+
+Se aplica el estimador de Saltelli (2010):
+
+$$\hat{S}_i = \frac{\frac{1}{N}\sum_{j=1}^{N} f(\mathbf{B})_j \cdot f(\mathbf{A}_B^{(i)})_j - f_0^2}{\hat{V}(Y)}$$
+
+donde $f_0 = \frac{1}{2N}\sum_{j=1}^{N}(f(\mathbf{A})_j + f(\mathbf{B})_j)$
+
+**Paso 4: Cálculo de Índices Totales ($S_T$)**
+
+Se utiliza el estimador de Jansen (1999):
+
+$$\hat{S}_{Ti} = \frac{\frac{1}{2N}\sum_{j=1}^{N} \left( f(\mathbf{A})_j - f(\mathbf{A}_B^{(i)})_j \right)^2}{\hat{V}(Y)}$$
+
+**Paso 5: Cálculo de Índices de Segundo Orden ($S_2$)** (si `calc_second_order=True`)
+
+$$\hat{S}_{ij} = \frac{V_{ij}}{V(Y)} - S_i - S_j$$
+
+donde $V_{ij}$ se estima usando las matrices $\mathbf{B}_A^{(i)}$.
+
+**Paso 6: Bootstrap para Intervalos de Confianza**
+
+Se aplica remuestreo bootstrap para estimar la incertidumbre:
+
+```python
+for _ in range(num_resamples):
+    idx = np.random.randint(0, N, N)  # Muestreo con reemplazo
+    S1_boot[i] = compute_S1(Y[idx])
+    ST_boot[i] = compute_ST(Y[idx])
+
+S1_conf = np.percentile(S1_boot, [alpha/2, 1-alpha/2])
+```
+
+#### 4.5.3 Estructura del Resultado
+
+La función retorna un diccionario `SALib.util.ResultDict` con:
+
+```python
+{
+    'S1': np.ndarray,      # Índices de primer orden (shape: k)
+    'S1_conf': np.ndarray, # Intervalos de confianza de S1 (shape: k)
+    'ST': np.ndarray,      # Índices totales (shape: k)
+    'ST_conf': np.ndarray, # Intervalos de confianza de ST (shape: k)
+    'S2': np.ndarray,      # Índices de segundo orden (shape: k×k) [opcional]
+    'S2_conf': np.ndarray  # Intervalos de confianza de S2 (shape: k×k) [opcional]
+}
+```
+
+
 ---
 
 ## 5. Interpretación de Resultados
