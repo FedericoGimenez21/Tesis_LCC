@@ -90,7 +90,7 @@ La búsqueda por cuadrícula discretiza cada dimensión del espacio de hiperpar�
 
 ### 4.3 Búsqueda aleatoria (Random Search)
 
-Propuesta por Bergstra y Bengio (2012), la búsqueda aleatoria muestrea configuraciones uniformemente al azar del espacio de hiperparámetros. Bergstra y Bengio demostraron teórica y empíricamente que, cuando solo un subconjunto de hiperparámetros tiene influencia significativa en el rendimiento (lo cual es frecuente en la práctica), la búsqueda aleatoria es más eficiente que la búsqueda por cuadrícula, ya que explora más valores únicos de cada hiperparámetro relevante con el mismo presupuesto de evaluaciones [2, 3].
+Propuesta por Bergstra y Bengio [8], la búsqueda aleatoria muestrea configuraciones uniformemente al azar del espacio de hiperparámetros. Bergstra y Bengio demostraron teórica y empíricamente que, cuando solo un subconjunto de hiperparámetros tiene influencia significativa en el rendimiento (lo cual es frecuente en la práctica), la búsqueda aleatoria es más eficiente que la búsqueda por cuadrícula, ya que explora más valores únicos de cada hiperparámetro relevante con el mismo presupuesto de evaluaciones [2, 3].
 
 Sin embargo, tanto Grid Search como Random Search tratan cada evaluación como independiente, sin utilizar información de evaluaciones previas para guiar la búsqueda. Esto las convierte en estrategias pasivas que no aprenden del historial de evaluaciones.
 
@@ -142,7 +142,7 @@ Los GP ofrecen estimaciones calibradas de incertidumbre, lo que los hace ideales
 
 #### 5.3.2 Tree-structured Parzen Estimator (TPE)
 
-Una alternativa popular a los GP es el **Tree-structured Parzen Estimator** (TPE), propuesto por Bergstra et al. (2011) e implementado en la librería Hyperopt. En lugar de modelar $p(y | \boldsymbol{\lambda})$ directamente, el TPE modela las densidades condicionales $\ell(\boldsymbol{\lambda}) = p(\boldsymbol{\lambda} | y < y^*)$ y $g(\boldsymbol{\lambda}) = p(\boldsymbol{\lambda} | y \geq y^*)$, donde $y^*$ es un umbral que separa evaluaciones "buenas" de "malas" [2]. La función de adquisición EI se maximiza al maximizar la razón $\ell(\boldsymbol{\lambda}) / g(\boldsymbol{\lambda})$, lo que favorece regiones donde la densidad de buenas configuraciones es alta respecto a las malas.
+Una alternativa popular a los GP es el **Tree-structured Parzen Estimator** (TPE), propuesto por Bergstra et al. (2011) [9] e implementado en la librería Hyperopt. En lugar de modelar $p(y | \boldsymbol{\lambda})$ directamente, el TPE modela las densidades condicionales $\ell(\boldsymbol{\lambda}) = p(\boldsymbol{\lambda} | y < y^*)$ y $g(\boldsymbol{\lambda}) = p(\boldsymbol{\lambda} | y \geq y^*)$, donde $y^*$ es un umbral que separa evaluaciones "buenas" de "malas" [2]. La función de adquisición EI se maximiza al maximizar la razón $\ell(\boldsymbol{\lambda}) / g(\boldsymbol{\lambda})$, lo que favorece regiones donde la densidad de buenas configuraciones es alta respecto a las malas.
 
 El TPE maneja naturalmente espacios condicionales y jerárquicos, lo que lo hace particularmente adecuado para hiperparámetros con dependencias estructurales (como elegir *tipo de selección* y luego *tamaño de torneo* solo si el tipo es torneo).
 
@@ -270,3 +270,7 @@ La optimización de hiperparámetros de Algoritmos Genéticos mediante Optimizac
 [6]: Lindauer, M., Eggensperger, K., Feurer, M., Biedenkapp, A., Deng, D., Benjamins, C., … Hutter, F. (2022). SMAC3: A Versatile Bayesian Optimization Package for Hyperparameter Optimization. 
 
 [7]: Akiba, T., Sano, S., Yanase, T., Ohta, T., & Koyama, M. (2019). Optuna: A Next-generation Hyperparameter Optimization Framework.
+
+[8]: Bergstra, J., & Bengio, Y. (2012). Random Search for Hyper-Parameter Optimization. 
+
+[9]: Bergstra, J., Bardenet, R., Bengio, Y., & Kégl, B. (2011). Algorithms for Hyper-Parameter Optimization. Neural Information Processing Systems.
