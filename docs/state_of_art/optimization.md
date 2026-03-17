@@ -148,7 +148,16 @@ El TPE maneja naturalmente espacios condicionales y jerárquicos, lo que lo hace
 
 #### 5.3.3 Random Forests (SMAC)
 
-El framework **SMAC** (*Sequential Model-based Algorithm Configuration*) [6], utiliza Random Forests como modelo sustituto. Los Random Forests estiman la media y varianza de la función objetivo mediante un ensamble de árboles de decisión, lo que los hace robustos ante hiperparámetros categóricos y espacios de alta dimensionalidad [2]. SMAC es particularmente útil cuando el espacio de configuración incluye una mezcla compleja de tipos de hiperparámetros.
+El framework **SMAC3** (*Sequential Model-based Algorithm Configuration*) [6] utiliza, por defecto, un Random Forest como modelo sustituto para aproximar la función objetivo de la optimización de hiperparámetros.
+
+En este contexto, el Random Forest no se emplea como modelo predictivo final del problema, sino como un metamodelo que estima el rendimiento esperado de cada configuración de hiperparámetros y su incertidumbre asociada. Esta elección es especialmente adecuada para espacios de búsqueda mixtos (continuos, discretos y categóricos) y condicionales, frecuentes en la configuración de algoritmos.
+
+El bosque se construye mediante bagging y selección aleatoria de características, lo que reduce la correlación entre árboles y mejora la robustez frente al ruido. A partir del conjunto de árboles, SMAC3 obtiene una predicción de desempeño y una medida de incertidumbre (derivada de la variabilidad entre predicciones individuales), que se utiliza en la función de adquisición para balancear exploración y explotación.
+
+Además, SMAC3 integra un mecanismo de intensificación que compara configuraciones candidatas bajo distintos presupuestos de evaluación, asignando más recursos a las prometedoras y descartando tempranamente las de bajo rendimiento. Esta combinación entre modelo sustituto e intensificación permite una búsqueda eficiente cuando las evaluaciones son costosas y estocásticas.
+
+En el caso de esta tesis, donde cada evaluación del Algoritmo Genético puede ser costosa y ruidosa, SMAC3 resulta apropiado porque prioriza configuraciones prometedoras con menor número de ejecuciones totales.
+
 
 ### 5.4 Funciones de adquisición
 
