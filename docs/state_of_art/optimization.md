@@ -148,7 +148,7 @@ El TPE maneja naturalmente espacios condicionales y jerárquicos, lo que lo hace
 
 #### 5.3.3 Random Forests (SMAC)
 
-El framework **SMAC** (*Sequential Model-based Algorithm Configuration*) utiliza Random Forests como modelo sustituto. Los Random Forests estiman la media y varianza de la función objetivo mediante un ensamble de árboles de decisión, lo que los hace robustos ante hiperparámetros categóricos y espacios de alta dimensionalidad [2]. SMAC es particularmente útil cuando el espacio de configuración incluye una mezcla compleja de tipos de hiperparámetros.
+El framework **SMAC** (*Sequential Model-based Algorithm Configuration*) [6], utiliza Random Forests como modelo sustituto. Los Random Forests estiman la media y varianza de la función objetivo mediante un ensamble de árboles de decisión, lo que los hace robustos ante hiperparámetros categóricos y espacios de alta dimensionalidad [2]. SMAC es particularmente útil cuando el espacio de configuración incluye una mezcla compleja de tipos de hiperparámetros.
 
 ### 5.4 Funciones de adquisición
 
@@ -227,10 +227,10 @@ Este diseño permite encontrar configuraciones de GA de alto rendimiento con un 
 
 Existen múltiples frameworks de código abierto que implementan las técnicas descritas:
 
-- **Optuna**: Framework moderno que implementa TPE y otros samplers, con soporte para pruning de evaluaciones subóptimas y paralelización.
-- **Hyperopt**: Implementación original de TPE con soporte para espacios de búsqueda condicionales.
+- **Optuna**: Framework moderno que implementa TPE y otros samplers, con soporte para pruning de evaluaciones subóptimas y paralelización. [7]
+- **Hyperopt**: Implementación original de TPE con soporte para espacios de búsqueda condicionales. [5]
 - **Scikit-Optimize (skopt)**: Implementación basada en Procesos Gaussianos, integrable con scikit-learn.
-- **SMAC3**: Implementación del framework SMAC con Random Forests, especialmente adecuada para configuración de algoritmos.
+- **SMAC3**: Implementación del framework SMAC con Random Forests, especialmente adecuada para configuración de algoritmos. [6]
 
 
 ### 7.2 Restricciones computacionales
@@ -265,3 +265,8 @@ La optimización de hiperparámetros de Algoritmos Genéticos mediante Optimizac
 
 [4]: Frazier, P.I. (2018). Bayesian Optimization. Recent Advances in Optimization and Modeling of Contemporary Problems.
 
+[5]: Komer, B., Bergstra, J., Eliasmith, C. (2019). Hyperopt-Sklearn. In: Hutter, F., Kotthoff, L., Vanschoren, J. (eds) Automated Machine Learning. The Springer Series on Challenges in Machine Learning. Springer
+
+[6]: Lindauer, M., Eggensperger, K., Feurer, M., Biedenkapp, A., Deng, D., Benjamins, C., … Hutter, F. (2022). SMAC3: A Versatile Bayesian Optimization Package for Hyperparameter Optimization. 
+
+[7]: Akiba, T., Sano, S., Yanase, T., Ohta, T., & Koyama, M. (2019). Optuna: A Next-generation Hyperparameter Optimization Framework.
