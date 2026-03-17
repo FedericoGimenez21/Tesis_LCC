@@ -38,6 +38,11 @@ En su forma más simple, conocida como Q-learning tabular, el algoritmo almacena
 ![Q-learning-Algorithm](../images/q-learning-algorithm.png)
 *Figura 2: Pseudocódigo del algoritmo Q-Learning, detallando el bucle de interacción agente-entorno y la regla de actualización. Adaptado de Sutton y Barto [2].*
 
+Para complementar el pseudocódigo, la Figura 3 representa de forma esquemática el ciclo de interacción agente-entorno y cómo este ciclo alimenta la actualización iterativa de la Q-Table.
+
+![Agent-Environment-QTable](../images/agent-environment.jpg)
+*Figura 3: Esquema del ciclo de interacción en Q-Learning. El agente observa el estado actual, selecciona una acción basada en Q(s,a), recibe la recompensa y el nuevo estado del entorno, y actualiza la Q-Table en cada iteración.*
+
 ## Técnicas principales de inicialización de Q-tables
 
 La inicialización de las funciones de valor, específicamente las Q-Tables, es un aspecto crucial que influye significativamente en la eficiencia y la rapidez de convergencia del aprendizaje [2]. La estrategia de inicialización determina la postura inicial del agente frente a la incertidumbre, impactando directamente su estrategia de exploración temprana. Se han establecido varias metodologías canónicas, que van desde enfoques neutrales (como la inicialización a ceros) hasta estrategias que fomentan activamente la exploración (como la inicialización optimista). Este apartado analiza las técnicas fundamentales y culmina con enfoques híbridos avanzados que buscan optimizar este punto de partida.
