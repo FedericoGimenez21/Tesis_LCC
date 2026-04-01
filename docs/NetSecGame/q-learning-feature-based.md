@@ -192,6 +192,73 @@ Los resultados experimentales revelan una **limitación fundamental** en la repr
 
 2. **Memorización vs. aprendizaje**: El desempeño perfecto en el entorno estático, contrastado con el bajo desempeño en el entorno dinámico, confirma que el agente está memorizando configuraciones específicas.
 
+La diferencia en el rendimiento del agente entre el entorno estático y el dinámico (use_dynamic_addresses: True) se debe a una falla fundamental en la generalización. Aunque el agente utiliza un estado basado en características abstractas, el espacio de acciones permanece acoplado a las direcciones IP específicas de cada episodio.
+
+El diseño del agente (q_agent_feature_based.py) maneja correctamente la abstracción del estado. La función `get_state_id` transforma la información del entorno en un conjunto de características, permitiendo que estados conceptualmente similares (aunque tengan IPs diferentes) se mapeen al mismo identificador
+
+```python
+def get_state_id(self, state: GameState) -> tuple:
+    """
+    Extrae características del estado y las usa como identificador
+    """
+    state_str = state_as_ordered_string(state)
+    features = self.feature_extractor.extract_features(state_str)
+    return tuple(int(x) for x in features)
+```
+
+Sin embargo, el problema reside en la definición de las acciones. Cada objeto `Action` almacena la dirección IP de destino como un parámetro literal (un string), en lugar de usar un identificador abstracto (por ejemplo "Host1"):
+
+```python
+# Ejemplos de acciones con IPs específicas
+Action(ActionType.FindServices, parameters={'target_host': '192.168.1.1'})
+Action(ActionType.FindServices, parameters={'target_host': '10.0.0.1'})  
+Action(ActionType.ExploitService, parameters={'target_host': '172.16.0.1'})
+```
+
+Este acoplamiento entre la acción y la IP específica tiene un efecto drástico al cambiar de un entorno estático a uno dinámico.
+
+**Entorno Estático** (use_dynamic_addresses: False):
+
+Las IPs son constantes en todos los episodios (ej. 192.168.1.1, 192.168.1.2).
+
+El agente reutiliza las mismas instancias de Action miles de veces, permitiéndole aprender su valor.
+
+Resultado: El espacio de acciones explorado es pequeño y manejable (725 acciones únicas).
+
+**Entorno Dinámico** (use_dynamic_addresses: True):
+
+En cada episodio, las IPs cambian aleatoriamente
+
+Episode 1: FindServices(target_host='192.168.1.1')
+
+Episode 2: FindServices(target_host='10.0.0.1')
+
+Episode 3: FindServices(target_host='172.16.0.1')
+
+Resultado: El espacio de acciones sufre una explosión combinatoria (1,221,569 acciones únicas). El agente trata cada acción como un evento nuevo y único.
+
+#### Imposibilidad de Convergencia en la Tabla Q
+
+El aprendizaje Q-Learning se basa en actualizar el valor de pares (state_id, action). Al tener acciones que dependen de la IP, el conocimiento no se transfiere.
+
+- Entorno Estático: El agente puede aprender una política robusta porque actualiza repetidamente el valor del mismo par (state_id, Action).
+
+- Entorno Dinámico: El agente es incapaz de generalizar. Aunque el estado (2, 5, 2, 3, 1) sea el mismo, debe aprender desde cero el valor de la acción para cada nueva IP que encuentra.
+
+La Q-table almacena pares (state_id, action):
+```python
+# Entorno estático - mismas acciones reutilizadas
+q_values[(2, 5, 2, 3, 1), Action(FindServices, target='192.168.1.1')] = 0.5
+q_values[(3, 8, 4, 6, 2), Action(FindServices, target='192.168.1.1')] = 0.8
+
+# Entorno dinámico - nueva acción por cada IP vista
+q_values[(2, 5, 2, 3, 1), Action(FindServices, target='192.168.1.1')] = 0.5
+q_values[(2, 5, 2, 3, 1), Action(FindServices, target='10.0.0.1')] = 0.3
+q_values[(2, 5, 2, 3, 1), Action(FindServices, target='172.16.0.1')] = 0.7
+```
+
+Para solucionar este problema, es imperativo abstraer las direcciones IP también en el espacio de acciones. 
+
 ---
 
 ## Anexos
