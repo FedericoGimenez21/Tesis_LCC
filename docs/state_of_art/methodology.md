@@ -3,7 +3,7 @@
 Esta sección presenta la metodología general seguida para el diseño y la ejecución del trabajo experimental sobre NetSecGame. En primer lugar, se justifica la elección de un enfoque de aprendizaje por refuerzo con representación basada en características (*feature-based*), seleccionado por su capacidad de generalización y por reducir la dimensionalidad del espacio de estados frente a representaciones tabulares puras. En segundo término, se describe el flujo de preprocesamiento de datos. La interpretación de resultados se centra en el *win rate* como métrica principal de desempeño, entendido como la proporción de episodios en los que el agente alcanza el objetivo definido en el entorno bajo un presupuesto de pasos dado. Finalmente, se detallan las tecnologías y librerías utilizadas para implementar, automatizar y monitorear los experimentos.
 
 
-# Representación de estados basada en características (Feature Based) para agente Q-Learning
+## Representación de estados basada en características (Feature Based) para agente Q-Learning
 
 En esta sección se presenta la modificación aplicada al algoritmo Q-Learning mediante la implementación de una representación de estados basada en características (*feature-based*) para mejorar el desempeño del agente en NetSecGame. La propuesta aborda las limitaciones del mapeo directo estado-identificador, introduciendo una abstracción que permite la generalización entre estados similares y reduce la complejidad del espacio de estados. 
 
@@ -18,7 +18,7 @@ Una vez establecida una representación adecuada y dimensionalmente controlable,
 
 En este contexto, la idea central del trabajo adopta el marco ReLIEF para aplicar técnicas de computación evolutiva que exploren y evalúen políticas iniciales en el entorno simulado de ciberseguridad NetSecGame. Como resultado, se obtiene una tabla Q preentrenada que reduce la exploración inicial no informada y acelera el aprendizaje secuencial del agente atacante en NetSecGame.
 
-## Arquitectura propuesta
+### Arquitectura del Agente
 
 La solución implementada consta de dos componentes principales:
 
@@ -59,7 +59,7 @@ La conformación de este espacio de búsqueda se dividió en dos procesos de ext
 
 ---
 
-# Implementación de algoritmo genético y optimización
+## Estrategia de Optimización en Dos Niveles
 
 Esta etapa tiene como objetivo **inicializar de manera informada** una política (tabla Q) antes del aprendizaje en línea, utilizando un esquema de optimización en dos niveles: (i) un **algoritmo genético** implementado con *pymoo* para optimizar los valores de la Q-table dentro de un espacio de estados y acciones ya definido, y (ii) una **optimización bayesiana** con *SMAC* para seleccionar automáticamente los hiperparámetros del algoritmo genético que mejor rendimiento producen.
 
@@ -68,7 +68,7 @@ Esta etapa tiene como objetivo **inicializar de manera informada** una política
 
 Como muestra la figura, el flujo se organiza como un bucle anidado: **SMAC3** propone una configuración de hiperparámetros y dispara una ejecución del **GA**. El GA genera y refina una población de Q-tables, las evalúa en el entorno y retorna el mejor *win rate* alcanzado. Ese resultado se utiliza como retroalimentación para que SMAC3 actualice su modelo y proponga nuevas configuraciones, hasta identificar la combinación de hiperparámetros que maximiza el rendimiento observado.
 
-## 1. Definición del Espacio de Búsqueda (Matriz Q)
+### 1. Definición del Espacio de Búsqueda (Matriz Q)
 
 El preprocesamiento detallado en la sección anterior establece los límites estrictos del espacio de búsqueda de la política, conformando dos conjuntos finitos:
 
@@ -81,7 +81,7 @@ $$Q: \mathcal{S} \times \mathcal{A} \to \mathbb{R}$$
 
 Esta delimitación arquitectónica garantiza que el optimizador evolutivo no genere estados anómalos ni acciones inválidas, sino que explore distribuciones de inicialización para los valores $Q(s,a)$ sobre un dominio controlado, determinista y comparable entre distintos experimentos.
 
-## 2. Nivel 1: optimización genética con *pymoo* (GA)
+### 2. Nivel 1: optimización genética con *pymoo* (GA)
 
 En el nivel interno, el framework *pymoo* ejecuta un algoritmo genético (GA) donde:
 
@@ -98,7 +98,7 @@ $$\text{win rate} = \frac{\#\text{episodios ganados}}{\#\text{episodios evaluado
 
 Este valor se utiliza como **función de aptitud (fitness)** del algoritmo genético: a mayor *win rate*, mejor es la Q-table candidata. Al finalizar las generaciones definidas, el GA retorna el mejor individuo observado, que constituye una **tabla Q preentrenada (warm-start)**.
 
-## 3. Nivel 2: optimización bayesiana con *SMAC* (meta-optimización del GA)
+### 3. Nivel 2: optimización bayesiana con *SMAC* (meta-optimización del GA)
 
 El rendimiento del GA depende fuertemente de sus hiperparámetros (por ejemplo, tamaño de población, número de generaciones y parámetros de cruzamiento/mutación). En lugar de fijarlos manualmente, se emplea *SMAC* para optimizarlos de forma automática.
 
@@ -123,8 +123,8 @@ De esta forma, el resultado final del proceso es doble: (i) una **configuración
 
 
 ---
-
-## Herramientas y tecnologías utilizadas 
+## Entorno Tecnológico
+### Herramientas y tecnologías utilizadas 
 
 En esta sección se detallan las herramientas de software adoptadas para el desarrollo experimental. La selección tecnológica se fundamentó en la necesidad de garantizar la interoperabilidad con el framework principal, NetSecGame, y asegurar una implementación eficiente. Se adoptó Python como lenguaje de programación central debido a su robusta compatibilidad con el entorno de simulación y su extenso ecosistema orientado a la optimización computacional.
 
@@ -167,9 +167,8 @@ El proyecto fue desarrollado utilizando Python (versión 3.12.0). Para la gesti�
 
 - matplotlib: Herramienta encargada de la generación de gráficas 2D para el análisis visual de los resultados obtenidos.
 
----
 
-## Recursos de Hardware
+### Recursos de Hardware
 
 La ejecución de las fases de entrenamiento, optimización de hiperparámetros y validación fue posible gracias a la infraestructura de cómputo de alto rendimiento provista por el Laboratorio de Sistemas Inteligentes (LABSIN https://labsin.org/es.html). El uso de estos recursos especializados garantizó la continuidad operativa de las pruebas, permitiendo mantener ejecuciones prolongadas y estables bajo cargas de procesamiento intensivas. Las especificaciones técnicas del nodo de cómputo utilizado se detallan en la Tabla N.
 
@@ -180,4 +179,8 @@ La ejecución de las fases de entrenamiento, optimización de hiperparámetros y
 | GPU | NVIDIA GeForce GTX 1080 Ti |
 | Memoria RAM | 64GB |
 
+---
+
+
+## Diseño de los Experimentos
 
