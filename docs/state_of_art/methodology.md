@@ -56,6 +56,66 @@ La conformación de este espacio de búsqueda se dividió en dos procesos de ext
 - Mapeo del Espacio de Acciones: Para definir el conjunto de acciones disponibles, se integró el componente WhiteBoxNSGCoordinator. Esta extensión del entorno NetSecGame opera bajo un enfoque de caja blanca, proporcionando visibilidad total sobre las mecánicas subyacentes y permitiendo extraer un listado exhaustivo de todas las acciones legales y posibles para cada agente registrado en la simulación.
 
 
+
+---
+
+# Implementación de algoritmo genético y optimización
+
+Esta etapa tiene como objetivo **inicializar de manera informada** una política (tabla Q) antes del aprendizaje en línea, utilizando un esquema de optimización en dos niveles: (i) un **algoritmo genético** implementado con *pymoo* para optimizar los valores de la Q-table dentro de un espacio de estados y acciones ya definido, y (ii) una **optimización bayesiana** con *SMAC* para seleccionar automáticamente los hiperparámetros del algoritmo genético que mejor rendimiento producen.
+
+## 1. Definición del Espacio de Búsqueda (Matriz Q)
+
+El preprocesamiento detallado en la sección anterior establece los límites estrictos del espacio de búsqueda de la política, conformando dos conjuntos finitos:
+
+- **Conjunto de estados $\mathcal{S}$**: obtenido a partir de estados empíricamente visitados (extraídos de una Q-table de referencia).
+- **Conjunto de acciones $\mathcal{A}$**: derivado del listado exhaustivo de acciones legales del entorno (mediante el coordinador de caja blanca).
+
+Bajo este esquema, la tabla Q se define formalmente como una matriz de dimensiones $|\mathcal{S}| \times |\mathcal{A}|$, donde cada candidato a política se reduce a asignar valores a los pares $(s,a)$ dentro de ese espacio fijo:
+
+$$Q: \mathcal{S} \times \mathcal{A} \to \mathbb{R}$$
+
+Esta delimitación arquitectónica garantiza que el optimizador evolutivo no genere estados anómalos ni acciones inválidas, sino que explore distribuciones de inicialización para los valores $Q(s,a)$ sobre un dominio controlado, determinista y comparable entre distintos experimentos.
+
+## 2. Nivel 1: optimización genética con *pymoo* (GA)
+
+En el nivel interno, el framework *pymoo* ejecuta un algoritmo genético (GA) donde:
+
+- **Cada individuo** representa una **Q-table completa** (es decir, una asignación de valores $Q(s,a)$ para todos los pares del espacio preprocesado).
+- El GA genera una **población inicial** de individuos y aplica iterativamente operadores de búsqueda para proponer nuevas políticas candidatas. En particular, se utilizaron los siguientes mecanismos típicos de algoritmos genéticos con variables reales:
+  - **Inicialización (FloatRandomSampling)**: crea la población inicial muestreando aleatoriamente valores reales dentro de los límites definidos para cada variable de decisión. En este trabajo, esto se traduce en generar Q-tables iniciales diversas asignando valores $Q(s,a)$ dentro de un rango acotado, lo que favorece la exploración temprana del espacio de políticas.
+  - **Cruzamiento (SBX, *Simulated Binary Crossover*)**: operador de recombinación para representación real que combina dos individuos “padre” produciendo descendientes con valores interpolados entre ambos (con una dispersión controlada por sus parámetros). Su rol es explotar información parcial de soluciones prometedoras sin perder continuidad en el espacio de búsqueda.
+  - **Mutación (PM, *Polynomial Mutation*)**: operador que introduce perturbaciones controladas en variables reales de un individuo. Mantiene diversidad en la población y permite escapar de óptimos locales al modificar, de forma probabilística, algunos valores $Q(s,a)$.
+- Para cada individuo, se realiza una **evaluación empírica** ejecutando episodios de prueba en NetSecGame utilizando esa Q-table como política estática.
+
+El desempeño de cada individuo se resume con el *win rate*, definido como:
+
+$$\text{win rate} = \frac{\#\text{episodios ganados}}{\#\text{episodios evaluados}}$$
+
+Este valor se utiliza como **función de aptitud (fitness)** del algoritmo genético: a mayor *win rate*, mejor es la Q-table candidata. Al finalizar las generaciones definidas, el GA retorna el mejor individuo observado, que constituye una **tabla Q preentrenada (warm-start)**.
+
+## 3. Nivel 2: optimización bayesiana con *SMAC* (meta-optimización del GA)
+
+El rendimiento del GA depende fuertemente de sus hiperparámetros (por ejemplo, tamaño de población, número de generaciones y parámetros de cruzamiento/mutación). En lugar de fijarlos manualmente, se emplea *SMAC* para optimizarlos de forma automática.
+
+El procedimiento puede describirse como un bucle externo:
+
+1. *SMAC* propone una configuración candidata de hiperparámetros del GA (definida en un espacio de configuración mediante *ConfigSpace*).
+2. Se instancia y ejecuta el Algoritmo Genético de pymoo utilizando dicha configuración sobre la matriz Q preprocesada (manteniendo $S$ y $A$ invariables).
+3. Se observa el mejor *win rate* alcanzado por el GA y se devuelve como resultado del *trial*.
+4. *SMAC* actualiza su modelo probabilístico (modelo sustituto) con la evidencia recolectada y selecciona una nueva configuración para el siguiente *trial*.
+
+En síntesis, *SMAC* no optimiza directamente la Q-table, sino que optimiza **cómo** se realiza la búsqueda genética, maximizando el *win rate* que el GA es capaz de obtener en el presupuesto de evaluación disponible.
+
+En resumen, la arquitectura de inicialización propuesta opera bajo el siguiente flujo secuencial:
+
+- **Preprocesamiento**: define $\mathcal{S}$ y $\mathcal{A}$ → fija la estructura $|\mathcal{S}| \times |\mathcal{A}|$.
+- **GA (*pymoo*)**: propone y evalúa Q-tables (valores $Q(s,a)$) → retorna la mejor tabla según *win rate*.
+- **SMAC**: prueba distintas configuraciones del GA → aprende cuáles producen mejores Q-tables → selecciona la configuración incumbente.
+
+De esta forma, el resultado final del proceso es doble: (i) una **configuración recomendada** de hiperparámetros del GA y (ii) una **Q-table optimizada** que se utiliza como punto de partida para los experimentos de entrenamiento y/o validación.
+
+---
+
 ## Herramientas y tecnologías utilizadas 
 
 En esta sección se detallan las herramientas de software adoptadas para el desarrollo experimental. La selección tecnológica se fundamentó en la necesidad de garantizar la interoperabilidad con el framework principal, NetSecGame, y asegurar una implementación eficiente. Se adoptó Python como lenguaje de programación central debido a su robusta compatibilidad con el entorno de simulación y su extenso ecosistema orientado a la optimización computacional.
@@ -98,8 +158,8 @@ El proyecto fue desarrollado utilizando Python (versión 3.12.0). Para la gesti�
 - mlflow: Implementado para la monitorización avanzada, permitiendo el registro, seguimiento y comparación de métricas y parámetros a lo largo de los distintos experimentos.
 
 - matplotlib: Herramienta encargada de la generación de gráficas 2D para el análisis visual de los resultados obtenidos.
----
 
+---
 
 ## Recursos de Hardware
 
