@@ -63,6 +63,11 @@ La conformación de este espacio de búsqueda se dividió en dos procesos de ext
 
 Esta etapa tiene como objetivo **inicializar de manera informada** una política (tabla Q) antes del aprendizaje en línea, utilizando un esquema de optimización en dos niveles: (i) un **algoritmo genético** implementado con *pymoo* para optimizar los valores de la Q-table dentro de un espacio de estados y acciones ya definido, y (ii) una **optimización bayesiana** con *SMAC* para seleccionar automáticamente los hiperparámetros del algoritmo genético que mejor rendimiento producen.
 
+![Esquema del optimizador en dos niveles (SMAC3 + GA/pymoo)](../images/optimizer.png)
+*Figura: Esquema del proceso de optimización propuesto. SMAC3 (nivel externo) selecciona configuraciones de hiperparámetros y, para cada *trial*, ejecuta un algoritmo genético en *pymoo* (nivel interno) que evalúa Q-tables en NetSecGame usando el *win rate* como métrica de aptitud.*
+
+Como muestra la figura, el flujo se organiza como un bucle anidado: **SMAC3** propone una configuración de hiperparámetros y dispara una ejecución del **GA**. El GA genera y refina una población de Q-tables, las evalúa en el entorno y retorna el mejor *win rate* alcanzado. Ese resultado se utiliza como retroalimentación para que SMAC3 actualice su modelo y proponga nuevas configuraciones, hasta identificar la combinación de hiperparámetros que maximiza el rendimiento observado.
+
 ## 1. Definición del Espacio de Búsqueda (Matriz Q)
 
 El preprocesamiento detallado en la sección anterior establece los límites estrictos del espacio de búsqueda de la política, conformando dos conjuntos finitos:
@@ -113,6 +118,9 @@ En resumen, la arquitectura de inicialización propuesta opera bajo el siguiente
 - **SMAC**: prueba distintas configuraciones del GA → aprende cuáles producen mejores Q-tables → selecciona la configuración incumbente.
 
 De esta forma, el resultado final del proceso es doble: (i) una **configuración recomendada** de hiperparámetros del GA y (ii) una **Q-table optimizada** que se utiliza como punto de partida para los experimentos de entrenamiento y/o validación.
+
+
+
 
 ---
 
