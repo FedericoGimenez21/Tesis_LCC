@@ -1,0 +1,20 @@
+# Credenciales locales
+.env
+.env.*
+secrets.*
+discord_token.txt
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# LaTeX/temp
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
